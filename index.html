@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Talonario · Recibos de renta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F4EFE1;
+    --paper-dark: #E9E0C8;
+    --card: #FBF8EF;
+    --ink: #23303D;
+    --ink-soft: #5B6B7A;
+    --ledger: #6B8F71;
+    --stamp: #B23A34;
+    --gold: #C79A3E;
+    --line: rgba(35,48,61,0.14);
+    --radius: 10px;
+    --shadow: 0 6px 18px rgba(35,48,61,0.10), 0 1px 3px rgba(35,48,61,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--paper-dark) 1px, transparent 1px) 0 0/100% 28px,
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    padding-bottom:84px;
+    position:relative;
+  }
+  .topbar{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:22px 20px 14px;
+  }
+  .brand{
+    font-family:'Special Elite', monospace;
+    font-size:20px;
+    letter-spacing:0.5px;
+    color:var(--ink);
+  }
+  .brand small{
+    display:block;
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .gear{
+    background:none;border:none;cursor:pointer;
+    font-size:20px; color:var(--ink-soft);
+    padding:6px;
+  }
+  .content{ padding: 4px 18px 20px; }
+
+  /* Cards */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .stat-row{ display:flex; gap:12px; margin-bottom:16px; }
+  .stat{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 12px;
+    box-shadow:var(--shadow);
+  }
+  .stat .num{
+    font-family:'Special Elite', monospace;
+    font-size:22px;
+    color:var(--ledger);
+  }
+  .stat .lbl{
+    font-size:11px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.8px;
+    margin-top:2px;
+  }
+
+  .cta{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:var(--radius);
+    padding:16px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-bottom:18px;
+    letter-spacing:0.2px;
+  }
+  .cta:active{ opacity:0.85; }
+
+  h2.section{
+    font-family:'Special Elite', monospace;
+    font-size:14px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin:22px 0 10px;
+  }
+
+  .payment-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 4px;
+    border-bottom:1px dashed var(--line);
+    cursor:pointer;
+  }
+  .payment-row:last-child{border-bottom:none;}
+  .payment-row .who{ font-weight:600; font-size:14.5px; }
+  .payment-row .meta{ font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .payment-row .amt{ font-family:'Courier Prime', monospace; font-weight:700; color:var(--ledger); font-size:15px;}
+  .empty{
+    text-align:center; color:var(--ink-soft); font-size:13.5px;
+    padding:30px 10px; line-height:1.6;
+  }
+
+  /* Forms */
+  label{
+    display:block; font-size:12px; font-weight:600; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.6px; margin:14px 0 6px;
+  }
+  label:first-child{ margin-top:0; }
+  input[type=text], input[type=number], input[type=date], input[type=tel], select, textarea{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    padding:11px 12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:2px solid var(--gold);
+    outline-offset:1px;
+    border-color:var(--gold);
+  }
+  textarea{ resize:vertical; min-height:60px; }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    padding:11px 16px;
+    border-radius:8px;
+    border:1.5px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn.primary{ background:var(--ink); color:var(--paper); }
+  .btn.danger{ border-color:var(--stamp); color:var(--stamp); }
+  .btn.full{ width:100%; margin-top:18px; }
+  .btn-row{ display:flex; gap:10px; margin-top:18px; }
+  .btn-row .btn{ flex:1; }
+
+  .prop-card{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:14px 4px; border-bottom:1px dashed var(--line);
+  }
+  .prop-card:last-child{ border-bottom:none; }
+  .prop-card .name{ font-weight:700; font-size:15px; }
+  .prop-card .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; line-height:1.5; }
+  .prop-card .rent{ font-family:'Courier Prime',monospace; font-size:13px; color:var(--ink-soft); margin-top:4px; }
+  .icon-btn{
+    background:none; border:none; cursor:pointer; color:var(--ink-soft);
+    font-size:16px; padding:4px 6px;
+  }
+
+  /* Bottom nav */
+  .navbar{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:480px;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    display:flex;
+    box-shadow: 0 -4px 14px rgba(35,48,61,0.08);
+  }
+  .navbar button{
+    flex:1; background:none; border:none; padding:10px 4px 12px;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--ink-soft); cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .navbar button.active{ color:var(--ink); }
+  .navbar .ic{ font-size:19px; }
+  .navbar .lb{ font-size:10.5px; font-weight:600; letter-spacing:0.3px; }
+
+  /* Receipt */
+  .receipt-wrap{ padding-top:6px; }
+  .receipt{
+    background:var(--card);
+    border-radius:6px;
+    box-shadow:var(--shadow);
+    position:relative;
+    padding:26px 22px 22px;
+    overflow:hidden;
+  }
+  .receipt::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:10px;
+    background-image: radial-gradient(circle 5px at 12px 0, transparent 5px, var(--paper) 5.5px);
+    background-size: 24px 10px;
+    background-repeat: repeat-x;
+  }
+  .receipt-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:14px;
+  }
+  .receipt-head .title{ font-family:'Special Elite',monospace; font-size:17px; }
+  .receipt-head .folio{
+    font-family:'Courier Prime',monospace; font-weight:700; font-size:13px;
+    color:var(--stamp); text-align:right;
+  }
+  .receipt-line{
+    display:flex; justify-content:space-between; gap:10px;
+    padding:7px 0; border-bottom:1px dotted var(--line);
+    font-size:13.5px;
+  }
+  .receipt-line .k{ color:var(--ink-soft); }
+  .receipt-line .v{ font-weight:600; text-align:right; }
+  .receipt-total{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:16px; padding-top:12px; border-top:2px solid var(--ink);
+  }
+  .receipt-total .k{ font-family:'Special Elite',monospace; font-size:13px; }
+  .receipt-total .v{ font-family:'Courier Prime',monospace; font-weight:700; font-size:22px; color:var(--ledger); }
+  .stamp-mark{
+    position:absolute; top:56px; right:18px;
+    border:3px solid var(--stamp); color:var(--stamp);
+    font-family:'Special Elite',monospace; font-size:13px;
+    padding:5px 10px; border-radius:6px;
+    transform:rotate(-9deg);
+    opacity:0.82;
+    letter-spacing:1.5px;
+  }
+  .receipt-notes{ margin-top:14px; font-size:12.5px; color:var(--ink-soft); font-style:italic; }
+  .receipt-foot{ margin-top:20px; font-size:11px; color:var(--ink-soft); text-align:center; letter-spacing:0.4px; }
+
+  .toast{
+    position:fixed; bottom:96px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:var(--paper); padding:10px 18px;
+    border-radius:20px; font-size:13px; box-shadow:var(--shadow);
+    z-index:50; opacity:0; pointer-events:none; transition:opacity 0.25s;
+  }
+  .toast.show{ opacity:1; }
+
+  select#pf, select#hf{ margin-bottom:10px; }
+
+  .badge{
+    display:inline-block; font-size:11px; font-weight:700;
+    padding:3px 8px; border-radius:12px; letter-spacing:0.3px;
+    margin-top:6px;
+  }
+  .badge.con{ background:rgba(178,58,52,0.12); color:var(--stamp); }
+  .badge.sin{ background:rgba(107,143,113,0.15); color:var(--ledger); }
+  .badge.pordefinir{ background:rgba(91,107,122,0.12); color:var(--ink-soft); }
+
+  .reminder-card{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:14px 4px; border-bottom:1px dashed var(--line);
+  }
+  .reminder-card:last-child{ border-bottom:none; }
+  .reminder-card .name{ font-weight:700; font-size:15px; }
+  .reminder-card .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
+  .reminder-days{
+    font-family:'Courier Prime',monospace; font-weight:700; font-size:13px;
+    text-align:right; white-space:nowrap; padding-left:10px;
+  }
+  .reminder-days.urgent{ color:var(--stamp); }
+  .reminder-days.soon{ color:var(--gold); }
+  .reminder-days.later{ color:var(--ink-soft); }
+  .alert-card{
+    background:rgba(178,58,52,0.08);
+    border:1px solid rgba(178,58,52,0.3);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:16px;
+    font-size:13px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    cursor:pointer;
+  }
+  .alert-card .txt{ color:var(--stamp); font-weight:600; line-height:1.4; }
+
+  @media print{
+    body{ background:#fff; }
+    .topbar, .navbar, .btn-row, .cta, h2.section{ display:none !important; }
+    #app{ max-width:100%; padding:0; }
+    .content{ padding:0; }
+    .receipt{ box-shadow:none; border:1px solid #999; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'renta-app-state-v1';
+let state = { properties: [], payments: [], nextFolio: 1, settings: { landlordName: '', landlordContact: '' } };
+let view = 'home';
+let activeReceiptId = null;
+let editingPropId = null;
+let selectedPropForNewPayment = null;
+let historyFilter = '';
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+    }
+  }catch(e){
+    // no hay datos guardados aún, se usan los valores por defecto
+  }
+  render();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    showToast('No se pudo guardar en este navegador.');
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function fmtMoney(n){
+  const num = Number(n)||0;
+  return num.toLocaleString('es-MX', {style:'currency', currency:'MXN'});
+}
+function fmtDate(d){
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'});
+}
+function todayISO(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function currentMonthLabel(){
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const d = new Date();
+  return meses[d.getMonth()]+' '+d.getFullYear();
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+function propById(id){ return state.properties.find(p=>p.id===id); }
+
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr+'T00:00:00');
+  return Math.round((target-today)/86400000);
+}
+function aumentoBadge(p){
+  const val = p.aumento || 'Por definir';
+  if(val==='Con aumento') return `<span class="badge con">Con aumento${p.porcentajeAumento?' · '+p.porcentajeAumento:''}</span>`;
+  if(val==='Sin aumento') return `<span class="badge sin">Sin aumento</span>`;
+  return `<span class="badge pordefinir">Por definir</span>`;
+}
+function upcomingRenewals(withinDays){
+  return state.properties
+    .filter(p=>p.fechaRenovacion)
+    .map(p=>({p, days:daysUntil(p.fechaRenovacion)}))
+    .filter(x=>x.days<=withinDays)
+    .sort((a,b)=>a.days-b.days);
+}
+
+function setView(v){ view = v; activeReceiptId=null; editingPropId=null; render(); window.scrollTo(0,0); }
+
+/* ---------- RENDER ---------- */
+function render(){
+  const app = document.getElementById('app');
+  let html = `
+    <div class="topbar">
+      <div class="brand">Talonario<small>Recibos de renta</small></div>
+      <button class="gear" onclick="setView('settings')" aria-label="Ajustes">⚙</button>
+    </div>
+    <div class="content">`;
+
+  if(view==='home') html += renderHome();
+  else if(view==='properties') html += renderProperties();
+  else if(view==='propForm') html += renderPropForm();
+  else if(view==='newPayment') html += renderNewPayment();
+  else if(view==='history') html += renderHistory();
+  else if(view==='receipt') html += renderReceipt();
+  else if(view==='settings') html += renderSettings();
+  else if(view==='reminders') html += renderReminders();
+
+  html += `</div>`;
+  html += `
+    <div class="navbar">
+      <button class="${view==='home'?'active':''}" onclick="setView('home')"><span class="ic">🏠</span><span class="lb">Inicio</span></button>
+      <button class="${view==='properties'||view==='propForm'?'active':''}" onclick="setView('properties')"><span class="ic">🏢</span><span class="lb">Deptos</span></button>
+      <button class="${view==='newPayment'?'active':''}" onclick="startNewPayment()"><span class="ic">🧾</span><span class="lb">Cobrar</span></button>
+      <button class="${view==='history'?'active':''}" onclick="setView('history')"><span class="ic">📖</span><span class="lb">Historial</span></button>
+      <button class="${view==='reminders'?'active':''}" onclick="setView('reminders')"><span class="ic">⏰</span><span class="lb">Avisos</span></button>
+    </div>`;
+  app.innerHTML = html;
+}
+
+function renderHome(){
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const cobradoMes = state.payments.filter(p=>p.fecha.slice(0,7)===thisMonth).reduce((s,p)=>s+Number(p.monto),0);
+  const recientes = [...state.payments].sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.folio-a.folio).slice(0,5);
+
+  let rows = recientes.map(p=>{
+    const prop = propById(p.propId);
+    return `<div class="payment-row" onclick="openReceipt('${p.id}')">
+      <div><div class="who">${prop?prop.nombre:'—'}</div><div class="meta">${p.periodo} · ${fmtDate(p.fecha)}</div></div>
+      <div class="amt">${fmtMoney(p.monto)}</div>
+    </div>`;
+  }).join('');
+  if(!recientes.length) rows = `<div class="empty">Aún no registras pagos.<br>Toca "Cobrar" para generar tu primer recibo.</div>`;
+
+  const upcoming = upcomingRenewals(30);
+  let alertHtml = '';
+  if(upcoming.length){
+    const first = upcoming[0];
+    const msg = upcoming.length===1
+      ? `${first.p.nombre} renueva contrato ${first.days<0?'hace '+Math.abs(first.days)+' días (¡vencido!)':first.days===0?'hoy':'en '+first.days+' días'}`
+      : `${upcoming.length} contratos por renovar en los próximos 30 días`;
+    alertHtml = `<div class="alert-card" onclick="setView('reminders')"><span class="txt">⏰ ${msg}</span><span>›</span></div>`;
+  }
+
+  return `
+    ${alertHtml}
+    <button class="cta" onclick="startNewPayment()">＋ Registrar pago y emitir recibo</button>
+    <div class="stat-row">
+      <div class="stat"><div class="num">${fmtMoney(cobradoMes)}</div><div class="lbl">Cobrado ${currentMonthLabel()}</div></div>
+      <div class="stat"><div class="num">${state.properties.length}</div><div class="lbl">Departamentos</div></div>
+    </div>
+    <h2 class="section">Últimos recibos</h2>
+    <div class="card">${rows}</div>
+  `;
+}
+
+function renderProperties(){
+  let rows = state.properties.map(p=>`
+    <div class="prop-card">
+      <div>
+        <div class="name">${p.nombre}</div>
+        <div class="sub">Inquilino: ${p.inquilino||'—'}${p.direccion?'<br>'+p.direccion:''}</div>
+        <div class="rent">Renta base: ${fmtMoney(p.renta)}</div>
+        ${p.fechaIngreso || p.deposito ? `<div class="sub">${p.fechaIngreso?'Ingresó: '+fmtDate(p.fechaIngreso):''}${p.fechaIngreso && p.deposito?' · ':''}${p.deposito?'Depósito: '+fmtMoney(p.deposito):''}</div>` : ''}
+        ${p.fechaRenovacion ? `<div class="sub">Renovación: ${fmtDate(p.fechaRenovacion)}</div>${aumentoBadge(p)}` : ''}
+      </div>
+      <div>
+        <button class="icon-btn" onclick="editProp('${p.id}')" aria-label="Editar">✎</button>
+        <button class="icon-btn" onclick="deleteProp('${p.id}')" aria-label="Eliminar">🗑</button>
+      </div>
+    </div>`).join('');
+  if(!state.properties.length) rows = `<div class="empty">No has agregado departamentos.<br>Agrega uno para poder registrar pagos.</div>`;
+
+  return `
+    <button class="cta" onclick="editProp(null)">＋ Agregar departamento</button>
+    <h2 class="section">Tus departamentos</h2>
+    <div class="card">${rows}</div>
+  `;
+}
+
+function renderPropForm(){
+  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',fechaRenovacion:'',aumento:'Por definir',porcentajeAumento:'',notasRenovacion:''};
+  const aumentoVal = p.aumento || 'Por definir';
+  return `
+    <h2 class="section">${editingPropId?'Editar departamento':'Nuevo departamento'}</h2>
+    <div class="card">
+      <label for="pf-nombre">Nombre / identificador</label>
+      <input type="text" id="pf-nombre" placeholder="Depto 3B, Casa Roble..." value="${p.nombre||''}">
+      <label for="pf-inquilino">Inquilino</label>
+      <input type="text" id="pf-inquilino" placeholder="Nombre del inquilino" value="${p.inquilino||''}">
+      <label for="pf-direccion">Dirección (opcional)</label>
+      <input type="text" id="pf-direccion" placeholder="Calle, número, colonia" value="${p.direccion||''}">
+      <label for="pf-renta">Renta mensual</label>
+      <input type="number" id="pf-renta" placeholder="0.00" value="${p.renta||''}">
+      <label for="pf-fechaingreso">Fecha de ingreso del inquilino</label>
+      <input type="date" id="pf-fechaingreso" value="${p.fechaIngreso||''}">
+      <label for="pf-deposito">Monto del depósito</label>
+      <input type="number" id="pf-deposito" placeholder="0.00" value="${p.deposito||''}">
+    </div>
+    <h2 class="section">Renovación de contrato</h2>
+    <div class="card">
+      <label for="pf-fecharenovacion">Fecha de renovación / vencimiento</label>
+      <input type="date" id="pf-fecharenovacion" value="${p.fechaRenovacion||''}">
+      <label for="pf-aumento">¿Se renueva con aumento?</label>
+      <select id="pf-aumento" onchange="toggleAumentoPct(this.value)">
+        <option ${aumentoVal==='Por definir'?'selected':''}>Por definir</option>
+        <option ${aumentoVal==='Con aumento'?'selected':''}>Con aumento</option>
+        <option ${aumentoVal==='Sin aumento'?'selected':''}>Sin aumento</option>
+      </select>
+      <div id="pf-pct-wrap" style="display:${aumentoVal==='Con aumento'?'block':'none'}">
+        <label for="pf-pct">Porcentaje o monto de aumento (opcional)</label>
+        <input type="text" id="pf-pct" placeholder="Ej. 10% o $500" value="${p.porcentajeAumento||''}">
+      </div>
+      <label for="pf-notasrenovacion">Notas de renovación (opcional)</label>
+      <textarea id="pf-notasrenovacion" placeholder="Ej. avisar al inquilino con 30 días de anticipación">${p.notasRenovacion||''}</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="setView('properties')">Cancelar</button>
+      <button class="btn primary" onclick="saveProp()">Guardar</button>
+    </div>
+  `;
+}
+
+function toggleAumentoPct(val){
+  document.getElementById('pf-pct-wrap').style.display = (val==='Con aumento') ? 'block' : 'none';
+}
+
+function renderNewPayment(){
+  if(!state.properties.length){
+    return `<div class="card"><div class="empty">Primero agrega un departamento en la pestaña "Deptos".</div>
+      <button class="btn primary full" onclick="editProp(null)">＋ Agregar departamento</button></div>`;
+  }
+  const selId = selectedPropForNewPayment || state.properties[0].id;
+  const prop = propById(selId);
+  const options = state.properties.map(p=>`<option value="${p.id}" ${p.id===selId?'selected':''}>${p.nombre}</option>`).join('');
+  return `
+    <h2 class="section">Registrar pago</h2>
+    <div class="card">
+      <label for="np-prop">Departamento</label>
+      <select id="np-prop" onchange="onChangePaymentProp(this.value)">${options}</select>
+
+      <label for="np-fecha">Fecha de pago</label>
+      <input type="date" id="np-fecha" value="${todayISO()}">
+
+      <label for="np-periodo">Periodo que cubre</label>
+      <input type="text" id="np-periodo" value="${currentMonthLabel()}" placeholder="Ej. Agosto 2026">
+
+      <label for="np-monto">Monto recibido</label>
+      <input type="number" id="np-monto" value="${prop.renta||''}">
+
+      <label for="np-metodo">Método de pago</label>
+      <select id="np-metodo">
+        <option>Efectivo</option>
+        <option>Transferencia</option>
+        <option>Depósito</option>
+        <option>Otro</option>
+      </select>
+
+      <label for="np-notas">Notas (opcional)</label>
+      <textarea id="np-notas" placeholder="Ej. incluye mantenimiento"></textarea>
+
+      <button class="btn primary full" onclick="savePayment()">Generar recibo</button>
+    </div>
+  `;
+}
+
+function renderHistory(){
+  const filterOpts = `<option value="">Todos los departamentos</option>` +
+    state.properties.map(p=>`<option value="${p.id}" ${p.id===historyFilter?'selected':''}>${p.nombre}</option>`).join('');
+  let list = [...state.payments].sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.folio-a.folio);
+  if(historyFilter) list = list.filter(p=>p.propId===historyFilter);
+
+  let rows = list.map(p=>{
+    const prop = propById(p.propId);
+    return `<div class="payment-row" onclick="openReceipt('${p.id}')">
+      <div><div class="who">${prop?prop.nombre:'—'} · Folio ${String(p.folio).padStart(4,'0')}</div><div class="meta">${p.periodo} · ${fmtDate(p.fecha)}</div></div>
+      <div class="amt">${fmtMoney(p.monto)}</div>
+    </div>`;
+  }).join('');
+  if(!list.length) rows = `<div class="empty">No hay pagos con ese filtro.</div>`;
+
+  return `
+    <h2 class="section">Historial de pagos</h2>
+    <select id="hf" onchange="historyFilter=this.value; render();">${filterOpts}</select>
+    <div class="card">${rows}</div>
+  `;
+}
+
+function renderReceipt(){
+  const p = state.payments.find(x=>x.id===activeReceiptId);
+  if(!p) return `<div class="empty">Recibo no encontrado.</div>`;
+  const prop = propById(p.propId);
+  const folioStr = String(p.folio).padStart(4,'0');
+  return `
+    <div class="receipt-wrap">
+      <div class="receipt">
+        <div class="stamp-mark">PAGADO</div>
+        <div class="receipt-head">
+          <div class="title">Recibo de renta</div>
+          <div class="folio">No. ${folioStr}<br>${fmtDate(p.fecha)}</div>
+        </div>
+        <div class="receipt-line"><span class="k">Recibí de</span><span class="v">${prop?prop.inquilino||'—':'—'}</span></div>
+        <div class="receipt-line"><span class="k">Por concepto de</span><span class="v">Renta — ${prop?prop.nombre:'—'}</span></div>
+        ${prop && prop.direccion ? `<div class="receipt-line"><span class="k">Dirección</span><span class="v">${prop.direccion}</span></div>` : ''}
+        <div class="receipt-line"><span class="k">Periodo que cubre</span><span class="v">${p.periodo}</span></div>
+        <div class="receipt-line"><span class="k">Método de pago</span><span class="v">${p.metodo}</span></div>
+        ${state.settings.landlordName ? `<div class="receipt-line"><span class="k">Arrendador</span><span class="v">${state.settings.landlordName}</span></div>` : ''}
+        <div class="receipt-total"><span class="k">Total recibido</span><span class="v">${fmtMoney(p.monto)}</span></div>
+        ${p.notas ? `<div class="receipt-notes">Notas: ${p.notas}</div>` : ''}
+        <div class="receipt-foot">${state.settings.landlordName||'Arrendador'}${state.settings.landlordContact?' · '+state.settings.landlordContact:''}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="setView('history')">Volver</button>
+        <button class="btn" onclick="shareReceipt('${p.id}')">Compartir</button>
+        <button class="btn primary" onclick="window.print()">Imprimir / PDF</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReminders(){
+  const withDate = state.properties
+    .filter(p=>p.fechaRenovacion)
+    .map(p=>({p, days:daysUntil(p.fechaRenovacion)}))
+    .sort((a,b)=>a.days-b.days);
+  const withoutDate = state.properties.filter(p=>!p.fechaRenovacion);
+
+  let rows = withDate.map(({p,days})=>{
+    const cls = days<=30 ? 'urgent' : days<=90 ? 'soon' : 'later';
+    const dayLabel = days<0 ? `Vencido hace ${Math.abs(days)}d` : days===0 ? 'Hoy' : `en ${days}d`;
+    return `<div class="reminder-card" onclick="editProp('${p.id}')">
+      <div>
+        <div class="name">${p.nombre}</div>
+        <div class="sub">Vence: ${fmtDate(p.fechaRenovacion)}</div>
+        ${aumentoBadge(p)}
+        ${p.notasRenovacion?`<div class="sub" style="margin-top:6px;font-style:italic;">${p.notasRenovacion}</div>`:''}
+      </div>
+      <div class="reminder-days ${cls}">${dayLabel}</div>
+    </div>`;
+  }).join('');
+  if(!withDate.length) rows = `<div class="empty">No tienes fechas de renovación registradas.<br>Agrégalas desde "Deptos" al editar cada departamento.</div>`;
+
+  let withoutRows = withoutDate.map(p=>`
+    <div class="reminder-card" onclick="editProp('${p.id}')">
+      <div><div class="name">${p.nombre}</div><div class="sub">Sin fecha de renovación registrada</div></div>
+      <div class="icon-btn">✎</div>
+    </div>`).join('');
+
+  return `
+    <h2 class="section">Próximas renovaciones</h2>
+    <div class="card">${rows}</div>
+    ${withoutDate.length ? `<h2 class="section">Sin fecha registrada</h2><div class="card">${withoutRows}</div>` : ''}
+  `;
+}
+
+function renderSettings(){
+  const s = state.settings;
+  return `
+    <h2 class="section">Datos del arrendador</h2>
+    <div class="card">
+      <label for="st-nombre">Tu nombre (aparece en el recibo)</label>
+      <input type="text" id="st-nombre" value="${s.landlordName||''}">
+      <label for="st-contacto">Teléfono o contacto (opcional)</label>
+      <input type="text" id="st-contacto" value="${s.landlordContact||''}">
+      <button class="btn primary full" onclick="saveSettings()">Guardar</button>
+    </div>
+    <h2 class="section">Respaldo</h2>
+    <div class="card">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.6;">
+        Guarda un archivo de respaldo de vez en cuando, sobre todo antes de cambiar de celular o limpiar el navegador.
+      </div>
+      <button class="btn full" onclick="exportData()">⬇ Exportar datos (.json)</button>
+      <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importData(event)">
+      <button class="btn full" style="margin-top:10px;" onclick="document.getElementById('import-file').click()">⬆ Importar datos</button>
+    </div>
+    <h2 class="section">Datos</h2>
+    <div class="card">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.6;">
+        Tus departamentos y recibos se guardan directamente en este navegador/dispositivo. No pasan por internet ni por ninguna cuenta — solo tú los ves aquí.
+      </div>
+      <button class="btn danger full" onclick="resetAll()">Borrar todos los datos</button>
+    </div>
+  `;
+}
+
+/* ---------- ACTIONS ---------- */
+function startNewPayment(){
+  if(!state.properties.length){ setView('newPayment'); return; }
+  selectedPropForNewPayment = state.properties[0].id;
+  setView('newPayment');
+}
+function onChangePaymentProp(id){
+  selectedPropForNewPayment = id;
+  const prop = propById(id);
+  document.getElementById('np-monto').value = prop.renta || '';
+}
+function editProp(id){ editingPropId = id; view='propForm'; render(); }
+
+function saveProp(){
+  const nombre = document.getElementById('pf-nombre').value.trim();
+  const inquilino = document.getElementById('pf-inquilino').value.trim();
+  const direccion = document.getElementById('pf-direccion').value.trim();
+  const renta = document.getElementById('pf-renta').value;
+  const fechaIngreso = document.getElementById('pf-fechaingreso').value;
+  const deposito = document.getElementById('pf-deposito').value;
+  const fechaRenovacion = document.getElementById('pf-fecharenovacion').value;
+  const aumento = document.getElementById('pf-aumento').value;
+  const porcentajeAumento = document.getElementById('pf-pct') ? document.getElementById('pf-pct').value.trim() : '';
+  const notasRenovacion = document.getElementById('pf-notasrenovacion').value.trim();
+  if(!nombre){ showToast('Escribe un nombre para el departamento'); return; }
+  if(editingPropId){
+    const p = propById(editingPropId);
+    Object.assign(p, {nombre, inquilino, direccion, renta, fechaIngreso, deposito, fechaRenovacion, aumento, porcentajeAumento, notasRenovacion});
+  } else {
+    state.properties.push({id:uid(), nombre, inquilino, direccion, renta, fechaIngreso, deposito, fechaRenovacion, aumento, porcentajeAumento, notasRenovacion});
+  }
+  saveState();
+  showToast('Departamento guardado');
+  setView('properties');
+}
+function deleteProp(id){
+  if(!confirm('¿Eliminar este departamento? No se borrarán los recibos ya emitidos.')) return;
+  state.properties = state.properties.filter(p=>p.id!==id);
+  saveState();
+  render();
+}
+
+function savePayment(){
+  const propId = document.getElementById('np-prop').value;
+  const fecha = document.getElementById('np-fecha').value;
+  const periodo = document.getElementById('np-periodo').value.trim();
+  const monto = document.getElementById('np-monto').value;
+  const metodo = document.getElementById('np-metodo').value;
+  const notas = document.getElementById('np-notas').value.trim();
+  if(!fecha || !monto || Number(monto)<=0){ showToast('Revisa la fecha y el monto'); return; }
+  const folio = state.nextFolio;
+  const payment = {id:uid(), propId, fecha, periodo, monto, metodo, notas, folio};
+  state.payments.push(payment);
+  state.nextFolio = folio + 1;
+  saveState();
+  activeReceiptId = payment.id;
+  view = 'receipt';
+  render();
+  window.scrollTo(0,0);
+}
+
+function openReceipt(id){ activeReceiptId = id; view='receipt'; render(); window.scrollTo(0,0); }
+
+async function shareReceipt(id){
+  const p = state.payments.find(x=>x.id===id);
+  const prop = propById(p.propId);
+  const folioStr = String(p.folio).padStart(4,'0');
+  const text = `Recibo de renta No. ${folioStr}\nFecha: ${fmtDate(p.fecha)}\nDepartamento: ${prop?prop.nombre:''}\nInquilino: ${prop?prop.inquilino:''}\nPeriodo: ${p.periodo}\nMonto: ${fmtMoney(p.monto)}\nMétodo: ${p.metodo}`;
+  if(navigator.share){
+    try{ await navigator.share({title:'Recibo de renta', text}); }catch(e){}
+  } else {
+    try{
+      await navigator.clipboard.writeText(text);
+      showToast('Recibo copiado al portapapeles');
+    }catch(e){
+      showToast('No se pudo compartir en este dispositivo');
+    }
+  }
+}
+
+function saveSettings(){
+  state.settings.landlordName = document.getElementById('st-nombre').value.trim();
+  state.settings.landlordContact = document.getElementById('st-contacto').value.trim();
+  saveState();
+  showToast('Datos guardados');
+  setView('home');
+}
+
+function exportData(){
+  try{
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const fecha = todayISO();
+    a.href = url;
+    a.download = `recibos-renta-backup-${fecha}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Respaldo descargado');
+  }catch(e){
+    showToast('No se pudo exportar el respaldo');
+  }
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed || !Array.isArray(parsed.properties) || !Array.isArray(parsed.payments)){
+        showToast('El archivo no parece un respaldo válido');
+        return;
+      }
+      const reemplazar = confirm('Esto reemplazará todos tus datos actuales con los del respaldo. ¿Continuar?');
+      if(!reemplazar) return;
+      state = {
+        properties: parsed.properties || [],
+        payments: parsed.payments || [],
+        nextFolio: parsed.nextFolio || 1,
+        settings: parsed.settings || { landlordName:'', landlordContact:'' }
+      };
+      saveState();
+      showToast('Datos restaurados correctamente');
+      setView('home');
+    }catch(err){
+      showToast('No se pudo leer el archivo de respaldo');
+    } finally {
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll(){
+  if(!confirm('Esto borrará TODOS tus departamentos y recibos. ¿Continuar?')) return;
+  state = { properties: [], payments: [], nextFolio: 1, settings: { landlordName:'', landlordContact:'' } };
+  saveState();
+  showToast('Datos borrados');
+  setView('home');
+}
+
+loadState();
+</script>
+</body>
+</html>
