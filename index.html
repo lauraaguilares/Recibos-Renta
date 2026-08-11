@@ -545,7 +545,7 @@ function costosTotal(pago){
 
 function buildPeriodLedger(propId){
   const prop = propById(propId);
-  const rentaBase = prop ? Number(prop.renta)||0 : 0;
+  const rentaActual = prop ? Number(prop.renta)||0 : 0;
   const byPeriodo = {};
   state.payments.filter(x=>x.propId===propId).forEach(x=>{
     const key = x.periodo.trim();
@@ -558,6 +558,10 @@ function buildPeriodLedger(propId){
   let creditOrigen = null;
   periodos.forEach(key=>{
     const pagos = byPeriodo[key].slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.folio-b.folio);
+    // Renta vigente para este periodo: la que estaba activa cuando se registró su primer pago.
+    // Así, si luego renuevas el contrato con un aumento, los recibos ya emitidos no se recalculan.
+    const primerPago = pagos[0];
+    const rentaBase = (primerPago && primerPago.rentaAlPago!=null) ? Number(primerPago.rentaAlPago)||0 : rentaActual;
     const totalPagado = pagos.reduce((s,x)=>s+Number(x.monto),0);
     const costosPeriodo = pagos.reduce((s,x)=>s+costosTotal(x),0);
     const rentaEsperada = rentaBase + costosPeriodo;
@@ -684,6 +688,7 @@ function renderProperties(){
         <div class="sub">Inquilino: ${p.inquilino||'—'}${p.direccion?'<br>'+p.direccion:''}</div>
         <div class="rent">Renta base: ${fmtMoney(p.renta)}</div>
         ${p.fechaIngreso || p.deposito ? `<div class="sub">${p.fechaIngreso?'Ingresó: '+fmtDate(p.fechaIngreso):''}${p.fechaIngreso && p.deposito?' · ':''}${p.deposito?'Depósito: '+fmtMoney(p.deposito):''}</div>` : ''}
+        ${p.fiadorNombre ? `<div class="sub">Fiador: ${p.fiadorNombre}</div>` : ''}
         ${p.fechaUltimaRenovacion ? `<div class="sub" style="margin-top:5px;">Última renovación: ${fmtDate(p.fechaUltimaRenovacion)}</div>` : ''}
         ${p.fechaRenovacion ? `<div class="sub">Próx. vencimiento: ${fmtDate(p.fechaRenovacion)}</div>${vencimientoBadge(p)}` : ''}
         ${p.fechaAumento ? `<div class="sub" style="margin-top:5px;">Próx. aumento de renta: ${fmtDate(p.fechaAumento)}</div>` : ''}
@@ -703,7 +708,7 @@ function renderProperties(){
 }
 
 function renderPropForm(){
-  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',fechaUltimaRenovacion:'',fechaRenovacion:'',fechaAumento:'',notasRenovacion:''};
+  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',fechaUltimaRenovacion:'',fechaRenovacion:'',fechaAumento:'',notasRenovacion:'',fiadorNombre:'',fiadorDireccion:'',fiadorTelefono:''};
   return `
     <h2 class="section">${editingPropId?'Editar departamento':'Nuevo departamento'}</h2>
     <div class="card">
@@ -719,6 +724,16 @@ function renderPropForm(){
       <input type="date" id="pf-fechaingreso" value="${p.fechaIngreso||''}">
       <label for="pf-deposito">Monto del depósito</label>
       <input type="number" id="pf-deposito" placeholder="0.00" value="${p.deposito||''}">
+    </div>
+
+    <h2 class="section">Detalles de contrato</h2>
+    <div class="card">
+      <label for="pf-fiador-nombre">Nombre del fiador</label>
+      <input type="text" id="pf-fiador-nombre" placeholder="Nombre completo" value="${p.fiadorNombre||''}">
+      <label for="pf-fiador-direccion">Dirección del fiador</label>
+      <input type="text" id="pf-fiador-direccion" placeholder="Calle, número, colonia" value="${p.fiadorDireccion||''}">
+      <label for="pf-fiador-telefono">Teléfono del fiador</label>
+      <input type="tel" id="pf-fiador-telefono" placeholder="10 dígitos" value="${p.fiadorTelefono||''}">
     </div>
 
     <h2 class="section">Renovación de contrato</h2>
@@ -862,14 +877,14 @@ function renderReceipt(){
   if(!p) return `<div class="empty">Recibo no encontrado.</div>`;
   const prop = propById(p.propId);
   const folioStr = String(p.folio).padStart(4,'0');
-  const rentaBase = prop ? Number(prop.renta)||0 : 0;
   const monto = Number(p.monto)||0;
 
   const ledger = buildPeriodLedger(p.propId);
+  const rentaFallback = p.rentaAlPago!=null ? Number(p.rentaAlPago)||0 : (prop ? Number(prop.renta)||0 : 0);
   const entry = ledger[p.periodo.trim()] || {
-    pagos:[p], totalPagado:monto, costosPeriodo:costosTotal(p), rentaBase, rentaEsperada: rentaBase+costosTotal(p),
+    pagos:[p], totalPagado:monto, costosPeriodo:costosTotal(p), rentaBase:rentaFallback, rentaEsperada: rentaFallback+costosTotal(p),
     creditoInicial:0, creditoInicialOrigen:null,
-    disponible:monto, estado: rentaBase ? (monto<(rentaBase+costosTotal(p))?'parcial':monto>(rentaBase+costosTotal(p))?'sobrepago':'completo') : (p.tipoPago==='parcial'?'parcial':'completo'),
+    disponible:monto, estado: rentaFallback ? (monto<(rentaFallback+costosTotal(p))?'parcial':monto>(rentaFallback+costosTotal(p))?'sobrepago':'completo') : (p.tipoPago==='parcial'?'parcial':'completo'),
     creditoFinal:0, faltante:0
   };
 
@@ -877,6 +892,7 @@ function renderReceipt(){
   const pagosPeriodo = entry.pagos;
   const creditoInicial = entry.creditoInicial;
   const creditoOrigen = entry.creditoInicialOrigen;
+  const rentaBase = entry.rentaBase; // renta vigente EN ESE PERIODO (no la actual del depto)
 
   // Costos adicionales registrados en ESTE pago (luz, agua, internet, etc.) — van en su propio renglón
   const misCostos = p.costos || [];
@@ -948,6 +964,9 @@ function renderReceipt(){
   let generalesRows = '';
   if(prop){
     if(prop.deposito) generalesRows += `<div class="row"><span>Depósito</span><b>${fmtMoney(prop.deposito)}</b></div>`;
+    if(prop.fiadorNombre) generalesRows += `<div class="row"><span>Fiador</span><b>${prop.fiadorNombre}</b></div>`;
+    if(prop.fiadorTelefono) generalesRows += `<div class="row"><span>Tel. del fiador</span><b>${prop.fiadorTelefono}</b></div>`;
+    if(prop.fiadorDireccion) generalesRows += `<div class="row"><span>Dirección del fiador</span><b>${prop.fiadorDireccion}</b></div>`;
     if(prop.fechaUltimaRenovacion) generalesRows += `<div class="row"><span>Última renovación</span><b>${fmtDate(prop.fechaUltimaRenovacion)}</b></div>`;
     if(prop.fechaRenovacion) generalesRows += `<div class="row"><span>Próxima renovación</span><b>${fmtDate(prop.fechaRenovacion)}</b></div>`;
     if(prop.fechaAumento) generalesRows += `<div class="row"><span>Próximo aumento de renta</span><b>${fmtDate(prop.fechaAumento)}</b></div>`;
@@ -1030,7 +1049,7 @@ function renderReceipt(){
 }
 
 function renderReminders(){
-  const withVenc = upcomingByField('fechaRenovacion', Infinity);
+  const withVenc = upcomingByField('fechaRenovacion', 30);
   const withAum = upcomingByField('fechaAumento', Infinity);
   const sinNinguna = state.properties.filter(p=>!p.fechaRenovacion && !p.fechaAumento);
 
@@ -1055,7 +1074,7 @@ function renderReminders(){
       ${isOpen ? renderRenewForm(p) : ''}
     </div>`;
   }).join('');
-  if(!withVenc.length) vencRows = `<div class="empty">No tienes fechas de vencimiento registradas.<br>Agrégalas desde "Deptos" al editar cada departamento.</div>`;
+  if(!withVenc.length) vencRows = `<div class="empty">No tienes contratos vencidos ni por vencer en los próximos 30 días.<br>Agrega fechas de vencimiento desde "Deptos" al editar cada departamento.</div>`;
 
   let aumRows = withAum.map(({p,days})=>{
     const cls = days<=30 ? 'urgent' : days<=90 ? 'soon' : 'later';
@@ -1252,20 +1271,39 @@ function saveProp(){
   const renta = document.getElementById('pf-renta').value;
   const fechaIngreso = document.getElementById('pf-fechaingreso').value;
   const deposito = document.getElementById('pf-deposito').value;
+  const fiadorNombre = document.getElementById('pf-fiador-nombre').value.trim();
+  const fiadorDireccion = document.getElementById('pf-fiador-direccion').value.trim();
+  const fiadorTelefono = document.getElementById('pf-fiador-telefono').value.trim();
   const fechaUltimaRenovacion = document.getElementById('pf-fechaultima').value;
   const fechaRenovacion = document.getElementById('pf-fecharenovacion').value;
   const fechaAumento = document.getElementById('pf-fechaaumento').value;
   const notasRenovacion = document.getElementById('pf-notasrenovacion').value.trim();
   if(!nombre){ showToast('Escribe un nombre para el departamento'); return; }
-  const datos = {nombre, inquilino, direccion, renta, fechaIngreso, deposito, fechaUltimaRenovacion, fechaRenovacion, fechaAumento, notasRenovacion};
+  const datos = {nombre, inquilino, direccion, renta, fechaIngreso, deposito, fiadorNombre, fiadorDireccion, fiadorTelefono, fechaUltimaRenovacion, fechaRenovacion, fechaAumento, notasRenovacion};
+  let mensajeGuardado = 'Departamento guardado';
   if(editingPropId){
     const p = propById(editingPropId);
+    const rentaAnterior = Number(p.renta)||0;
+    const rentaNueva = Number(renta)||0;
+    if(rentaAnterior && rentaNueva && rentaAnterior!==rentaNueva){
+      // Antes de aplicar el cambio, "congela" la renta anterior en los pagos ya
+      // registrados que todavía no tengan su propio snapshot, para que el aumento
+      // no reescriba recibos ya emitidos.
+      let congelados = 0;
+      state.payments.forEach(pay=>{
+        if(pay.propId===editingPropId && pay.rentaAlPago==null){
+          pay.rentaAlPago = rentaAnterior;
+          congelados++;
+        }
+      });
+      if(congelados>0) mensajeGuardado = `Guardado. Se protegieron ${congelados} recibo(s) anteriores con la renta previa (${fmtMoney(rentaAnterior)}).`;
+    }
     Object.assign(p, datos);
   } else {
     state.properties.push(Object.assign({id:uid()}, datos));
   }
   saveState();
-  showToast('Departamento guardado');
+  showToast(mensajeGuardado);
   setView('properties');
 }
 function deleteProp(id){
@@ -1286,8 +1324,10 @@ function savePayment(){
   const costos = costosAdicionales
     .filter(c=>c.concepto && Number(c.monto)>0)
     .map(c=>({concepto:c.concepto.trim(), monto:Number(c.monto)}));
+  const prop = propById(propId);
+  const rentaAlPago = prop ? Number(prop.renta)||0 : 0;
   const folio = state.nextFolio;
-  const payment = {id:uid(), propId, fecha, periodo, monto, metodo, notas, folio, tipoPago: paymentTipo, costos};
+  const payment = {id:uid(), propId, fecha, periodo, monto, metodo, notas, folio, tipoPago: paymentTipo, costos, rentaAlPago};
   state.payments.push(payment);
   state.nextFolio = folio + 1;
   saveState();
