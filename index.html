@@ -91,6 +91,8 @@
     font-size:22px;
     color:var(--ledger);
   }
+  .stat .num.expense{ color:var(--stamp); }
+  .amt.expense{ color:var(--stamp) !important; }
   .stat .lbl{
     font-size:11px;
     color:var(--ink-soft);
@@ -203,13 +205,14 @@
     box-shadow: 0 -4px 14px rgba(35,48,61,0.08);
   }
   .navbar button{
-    flex:1; background:none; border:none; padding:10px 4px 12px;
-    display:flex; flex-direction:column; align-items:center; gap:3px;
+    flex:1; background:none; border:none; padding:9px 2px 11px;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
     color:var(--ink-soft); cursor:pointer; font-family:'Inter',sans-serif;
+    min-width:0;
   }
   .navbar button.active{ color:var(--ink); }
-  .navbar .ic{ font-size:19px; }
-  .navbar .lb{ font-size:10.5px; font-weight:600; letter-spacing:0.3px; }
+  .navbar .ic{ font-size:17px; }
+  .navbar .lb{ font-size:9.5px; font-weight:600; letter-spacing:0.1px; white-space:nowrap; }
 
   /* Receipt */
   .receipt-wrap{ padding-top:6px; }
@@ -390,7 +393,7 @@
 
 <script>
 const STORAGE_KEY = 'renta-app-state-v1';
-let state = { properties: [], payments: [], nextFolio: 1, settings: { landlordName: '', landlordContact: '' } };
+let state = { properties: [], payments: [], expenses: [], buildings: [], nextFolio: 1, settings: { landlordName: '', landlordContact: '' } };
 let view = 'home';
 let activeReceiptId = null;
 let editingPropId = null;
@@ -399,6 +402,9 @@ let selectedPropForNewPayment = null;
 let paymentTipo = 'completo';
 let costosAdicionales = [];
 let historyFilter = '';
+let editingExpenseId = null;
+let expenseFilter = '';
+let editingBuildingId = null;
 
 function loadState(){
   try{
@@ -606,7 +612,7 @@ function paymentStatusTag(p){
   return '';
 }
 
-function setView(v){ view = v; activeReceiptId=null; editingPropId=null; renewingPropId=null; render(); window.scrollTo(0,0); }
+function setView(v){ view = v; activeReceiptId=null; editingPropId=null; renewingPropId=null; editingExpenseId=null; editingBuildingId=null; render(); window.scrollTo(0,0); }
 
 /* ---------- RENDER ---------- */
 function render(){
@@ -626,14 +632,18 @@ function render(){
   else if(view==='receipt') html += renderReceipt();
   else if(view==='settings') html += renderSettings();
   else if(view==='reminders') html += renderReminders();
+  else if(view==='expenses') html += renderExpenses();
+  else if(view==='expenseForm') html += renderExpenseForm();
+  else if(view==='buildingForm') html += renderBuildingForm();
 
   html += `</div>`;
   html += `
     <div class="navbar">
       <button class="${view==='home'?'active':''}" onclick="setView('home')"><span class="ic">🏠</span><span class="lb">Inicio</span></button>
-      <button class="${view==='properties'||view==='propForm'?'active':''}" onclick="setView('properties')"><span class="ic">🏢</span><span class="lb">Deptos</span></button>
+      <button class="${view==='properties'||view==='propForm'||view==='buildingForm'?'active':''}" onclick="setView('properties')"><span class="ic">🏢</span><span class="lb">Deptos</span></button>
       <button class="${view==='newPayment'?'active':''}" onclick="startNewPayment()"><span class="ic">🧾</span><span class="lb">Cobrar</span></button>
       <button class="${view==='history'?'active':''}" onclick="setView('history')"><span class="ic">📖</span><span class="lb">Historial</span></button>
+      <button class="${view==='expenses'||view==='expenseForm'?'active':''}" onclick="setView('expenses')"><span class="ic">💸</span><span class="lb">Gastos</span></button>
       <button class="${view==='reminders'?'active':''}" onclick="setView('reminders')"><span class="ic">⏰</span><span class="lb">Avisos</span></button>
     </div>`;
   app.innerHTML = html;
@@ -680,11 +690,15 @@ function renderHome(){
   `;
 }
 
-function renderProperties(){
-  let rows = state.properties.map(p=>`
+function buildingById(id){ return state.buildings.find(b=>b.id===id); }
+
+function propCardHtml(p){
+  const edificio = p.edificioId ? buildingById(p.edificioId) : null;
+  return `
     <div class="prop-card">
       <div>
         <div class="name">${p.nombre}</div>
+        ${edificio ? `<div class="sub">🏢 ${edificio.nombre}</div>` : ''}
         <div class="sub">Inquilino: ${p.inquilino||'—'}${p.direccion?'<br>'+p.direccion:''}</div>
         <div class="rent">Renta base: ${fmtMoney(p.renta)}</div>
         ${p.fechaIngreso || p.deposito ? `<div class="sub">${p.fechaIngreso?'Ingresó: '+fmtDate(p.fechaIngreso):''}${p.fechaIngreso && p.deposito?' · ':''}${p.deposito?'Depósito: '+fmtMoney(p.deposito):''}</div>` : ''}
@@ -697,23 +711,63 @@ function renderProperties(){
         <button class="icon-btn" onclick="editProp('${p.id}')" aria-label="Editar">✎</button>
         <button class="icon-btn" onclick="deleteProp('${p.id}')" aria-label="Eliminar">🗑</button>
       </div>
-    </div>`).join('');
-  if(!state.properties.length) rows = `<div class="empty">No has agregado departamentos.<br>Agrega uno para poder registrar pagos.</div>`;
+    </div>`;
+}
+
+function renderProperties(){
+  let buildingRows = state.buildings.map(b=>{
+    const count = state.properties.filter(p=>p.edificioId===b.id).length;
+    return `<div class="prop-card">
+      <div>
+        <div class="name">🏢 ${b.nombre}</div>
+        ${b.direccion ? `<div class="sub">${b.direccion}</div>` : ''}
+        <div class="sub">${count} depto${count!==1?'s':''} asignado${count!==1?'s':''}</div>
+      </div>
+      <div>
+        <button class="icon-btn" onclick="editBuilding('${b.id}')" aria-label="Editar">✎</button>
+        <button class="icon-btn" onclick="deleteBuilding('${b.id}')" aria-label="Eliminar">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+  if(!state.buildings.length) buildingRows = `<div class="empty">No has agregado edificios.<br>Agrégalos si varios deptos comparten gastos comunes (ej. agua del edificio, mantenimiento).</div>`;
+
+  let deptosHtml = '';
+  if(!state.properties.length){
+    deptosHtml = `<h2 class="section">Tus departamentos</h2><div class="card"><div class="empty">No has agregado departamentos.<br>Agrega uno para poder registrar pagos.</div></div>`;
+  } else {
+    state.buildings.forEach(b=>{
+      const deptos = state.properties.filter(p=>p.edificioId===b.id);
+      if(!deptos.length) return;
+      deptosHtml += `<h2 class="section">🏢 ${b.nombre}</h2><div class="card">${deptos.map(propCardHtml).join('')}</div>`;
+    });
+    const sinEdificio = state.properties.filter(p=>!p.edificioId);
+    if(sinEdificio.length){
+      deptosHtml += `<h2 class="section">${state.buildings.length?'Independientes (sin edificio)':'Tus departamentos'}</h2><div class="card">${sinEdificio.map(propCardHtml).join('')}</div>`;
+    }
+  }
 
   return `
     <button class="cta" onclick="editProp(null)">＋ Agregar departamento</button>
-    <h2 class="section">Tus departamentos</h2>
-    <div class="card">${rows}</div>
+
+    <h2 class="section">Edificios</h2>
+    <div class="card">${buildingRows}</div>
+    <button class="btn full" onclick="editBuilding(null)">＋ Agregar edificio</button>
+
+    ${deptosHtml}
   `;
 }
 
 function renderPropForm(){
-  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',fechaUltimaRenovacion:'',fechaRenovacion:'',fechaAumento:'',notasRenovacion:'',fiadorNombre:'',fiadorDireccion:'',fiadorTelefono:''};
+  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',edificioId:'',fechaUltimaRenovacion:'',fechaRenovacion:'',fechaAumento:'',notasRenovacion:'',fiadorNombre:'',fiadorDireccion:'',fiadorTelefono:''};
+  const edificioOpts = `<option value="">Sin edificio (independiente)</option>` +
+    state.buildings.map(b=>`<option value="${b.id}" ${b.id===p.edificioId?'selected':''}>${b.nombre}</option>`).join('');
   return `
     <h2 class="section">${editingPropId?'Editar departamento':'Nuevo departamento'}</h2>
     <div class="card">
       <label for="pf-nombre">Nombre / identificador</label>
       <input type="text" id="pf-nombre" placeholder="Depto 3B, Casa Roble..." value="${p.nombre||''}">
+      <label for="pf-edificio">Edificio (opcional)</label>
+      <select id="pf-edificio">${edificioOpts}</select>
       <label for="pf-inquilino">Inquilino</label>
       <input type="text" id="pf-inquilino" placeholder="Nombre del inquilino" value="${p.inquilino||''}">
       <label for="pf-direccion">Dirección (opcional)</label>
@@ -872,6 +926,121 @@ function renderHistory(){
   `;
 }
 
+const CATEGORIAS_GASTO = ['Mantenimiento','Limpieza','Luz','Agua','Gas','Internet','Predial','Mobiliario','Reparaciones','Inmobiliaria','Otro'];
+
+function renderExpenses(){
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const gastadoMes = state.expenses
+    .filter(g=>g.fecha.slice(0,7)===thisMonth)
+    .reduce((s,g)=>s+Number(g.monto),0);
+
+  let filterOpts = `<option value="">Todos</option><option value="general" ${expenseFilter==='general'?'selected':''}>General</option>`;
+  if(state.buildings.length){
+    filterOpts += `<optgroup label="Edificios">` + state.buildings.map(b=>`<option value="edificio:${b.id}" ${expenseFilter==='edificio:'+b.id?'selected':''}>🏢 ${b.nombre}</option>`).join('') + `</optgroup>`;
+  }
+  if(state.properties.length){
+    filterOpts += `<optgroup label="Departamentos">` + state.properties.map(p=>`<option value="depto:${p.id}" ${expenseFilter==='depto:'+p.id?'selected':''}>${p.nombre}</option>`).join('') + `</optgroup>`;
+  }
+
+  let list = [...state.expenses].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  if(expenseFilter==='general') list = list.filter(g=>!g.propId && !g.edificioId);
+  else if(expenseFilter.startsWith('edificio:')) { const id=expenseFilter.slice(9); list = list.filter(g=>g.edificioId===id); }
+  else if(expenseFilter.startsWith('depto:')) { const id=expenseFilter.slice(6); list = list.filter(g=>g.propId===id); }
+
+  let rows = list.map(g=>{
+    let targetLabel = 'General';
+    if(g.edificioId){ const b=buildingById(g.edificioId); targetLabel = b?'🏢 '+b.nombre:'Edificio'; }
+    else if(g.propId){ const prop=propById(g.propId); targetLabel = prop?prop.nombre:'Depto'; }
+    return `<div class="payment-row" onclick="editExpense('${g.id}')">
+      <div><div class="who">${g.concepto}</div><div class="meta">${g.categoria} · ${targetLabel} · ${fmtDate(g.fecha)}</div></div>
+      <div class="amt expense">-${fmtMoney(g.monto)}</div>
+    </div>`;
+  }).join('');
+  if(!list.length) rows = `<div class="empty">No hay gastos con ese filtro.</div>`;
+
+  return `
+    <button class="cta" onclick="editExpense(null)">＋ Registrar gasto</button>
+    <div class="stat-row">
+      <div class="stat"><div class="num expense">${fmtMoney(gastadoMes)}</div><div class="lbl">Gastado ${currentMonthLabel()}</div></div>
+      <div class="stat"><div class="num">${state.expenses.length}</div><div class="lbl">Gastos registrados</div></div>
+    </div>
+    <h2 class="section">Gastos</h2>
+    <select id="ef" onchange="expenseFilter=this.value; render();">${filterOpts}</select>
+    <div class="card">${rows}</div>
+  `;
+}
+
+function renderExpenseForm(){
+  const g = editingExpenseId ? state.expenses.find(x=>x.id===editingExpenseId) : {propId:'', edificioId:'', fecha:todayISO(), concepto:'', categoria:'Mantenimiento', monto:'', notas:''};
+  const targetActual = g.edificioId ? 'edificio:'+g.edificioId : g.propId ? 'depto:'+g.propId : 'general';
+  let targetOpts = `<option value="general" ${targetActual==='general'?'selected':''}>General (sin edificio ni depto)</option>`;
+  if(state.buildings.length){
+    targetOpts += `<optgroup label="Edificios">` + state.buildings.map(b=>`<option value="edificio:${b.id}" ${targetActual==='edificio:'+b.id?'selected':''}>🏢 ${b.nombre}</option>`).join('') + `</optgroup>`;
+  }
+  if(state.properties.length){
+    targetOpts += `<optgroup label="Departamentos">` + state.properties.map(p=>`<option value="depto:${p.id}" ${targetActual==='depto:'+p.id?'selected':''}>${p.nombre}</option>`).join('') + `</optgroup>`;
+  }
+  const catOpts = CATEGORIAS_GASTO.map(c=>`<option ${c===g.categoria?'selected':''}>${c}</option>`).join('');
+  return `
+    <h2 class="section">${editingExpenseId?'Editar gasto':'Nuevo gasto'}</h2>
+    <div class="card">
+      <label for="ex-target">¿A qué aplica este gasto?</label>
+      <select id="ex-target">${targetOpts}</select>
+      <div style="font-size:11.5px; color:var(--ink-soft); margin:-4px 0 8px;">Elige un edificio si es un gasto compartido (ej. agua del edificio), o un depto si es específico de esa unidad.</div>
+
+      <label for="ex-fecha">Fecha</label>
+      <input type="date" id="ex-fecha" value="${g.fecha||todayISO()}">
+
+      <label for="ex-concepto">Concepto</label>
+      <input type="text" id="ex-concepto" placeholder="Ej. Plomero, pintura, predial..." value="${g.concepto||''}">
+
+      <label for="ex-categoria">Categoría</label>
+      <select id="ex-categoria">${catOpts}</select>
+
+      <label for="ex-monto">Monto</label>
+      <input type="number" id="ex-monto" placeholder="0.00" value="${g.monto||''}">
+
+      <label for="ex-notas">Notas (opcional)</label>
+      <textarea id="ex-notas" placeholder="Detalles adicionales">${g.notas||''}</textarea>
+    </div>
+    <div class="btn-row">
+      ${editingExpenseId ? `<button class="btn danger" onclick="deleteExpense('${editingExpenseId}')">Eliminar</button>` : `<button class="btn" onclick="setView('expenses')">Cancelar</button>`}
+      <button class="btn primary" onclick="saveExpense()">Guardar</button>
+    </div>
+  `;
+}
+
+function editExpense(id){ editingExpenseId = id; view='expenseForm'; render(); }
+
+function saveExpense(){
+  const targetVal = document.getElementById('ex-target').value;
+  let propId = '', edificioId = '';
+  if(targetVal.startsWith('edificio:')) edificioId = targetVal.slice(9);
+  else if(targetVal.startsWith('depto:')) propId = targetVal.slice(6);
+  const fecha = document.getElementById('ex-fecha').value;
+  const concepto = document.getElementById('ex-concepto').value.trim();
+  const categoria = document.getElementById('ex-categoria').value;
+  const monto = document.getElementById('ex-monto').value;
+  const notas = document.getElementById('ex-notas').value.trim();
+  if(!concepto || !fecha || !monto || Number(monto)<=0){ showToast('Revisa el concepto, la fecha y el monto'); return; }
+  if(editingExpenseId){
+    const g = state.expenses.find(x=>x.id===editingExpenseId);
+    Object.assign(g, {propId, edificioId, fecha, concepto, categoria, monto, notas});
+  } else {
+    state.expenses.push({id:uid(), propId, edificioId, fecha, concepto, categoria, monto, notas});
+  }
+  saveState();
+  showToast('Gasto guardado');
+  setView('expenses');
+}
+
+function deleteExpense(id){
+  if(!confirm('¿Eliminar este gasto?')) return;
+  state.expenses = state.expenses.filter(g=>g.id!==id);
+  saveState();
+  setView('expenses');
+}
+
 function renderReceipt(){
   const p = state.payments.find(x=>x.id===activeReceiptId);
   if(!p) return `<div class="empty">Recibo no encontrado.</div>`;
@@ -907,7 +1076,7 @@ function renderReceipt(){
   const montoTrasCostos = Math.max(0, monto - misCostosTotal);
   const montoParaRenta = rentaBase ? Math.max(0, Math.min(montoTrasCostos, rentaBase - disponibleAntesDeEste)) : montoTrasCostos;
   const montoExcedente = rentaBase ? Math.max(0, montoTrasCostos - montoParaRenta) : 0;
-  const concepto = `Renta — ${p.periodo}${prop?' ('+prop.nombre+')':''}`;
+  const concepto = `Renta — ${p.periodo}`;
 
   let itemRows = '';
   if(montoParaRenta > 0){
@@ -1001,9 +1170,8 @@ function renderReceipt(){
               ${prop && prop.direccion ? `<div class="line">${prop.direccion}</div>` : ''}
             </div>
             <div class="receipt-party">
-              <div class="label">Propiedad</div>
-              <div class="name">${prop?prop.nombre:'—'}</div>
-              <div class="line">Método: ${p.metodo}</div>
+              <div class="label">Método de pago</div>
+              <div class="name">${p.metodo}</div>
             </div>
           </div>
 
@@ -1266,6 +1434,7 @@ function saveRenewal(id){
 
 function saveProp(){
   const nombre = document.getElementById('pf-nombre').value.trim();
+  const edificioId = document.getElementById('pf-edificio').value;
   const inquilino = document.getElementById('pf-inquilino').value.trim();
   const direccion = document.getElementById('pf-direccion').value.trim();
   const renta = document.getElementById('pf-renta').value;
@@ -1279,7 +1448,7 @@ function saveProp(){
   const fechaAumento = document.getElementById('pf-fechaaumento').value;
   const notasRenovacion = document.getElementById('pf-notasrenovacion').value.trim();
   if(!nombre){ showToast('Escribe un nombre para el departamento'); return; }
-  const datos = {nombre, inquilino, direccion, renta, fechaIngreso, deposito, fiadorNombre, fiadorDireccion, fiadorTelefono, fechaUltimaRenovacion, fechaRenovacion, fechaAumento, notasRenovacion};
+  const datos = {nombre, edificioId, inquilino, direccion, renta, fechaIngreso, deposito, fiadorNombre, fiadorDireccion, fiadorTelefono, fechaUltimaRenovacion, fechaRenovacion, fechaAumento, notasRenovacion};
   let mensajeGuardado = 'Departamento guardado';
   if(editingPropId){
     const p = propById(editingPropId);
@@ -1311,6 +1480,49 @@ function deleteProp(id){
   state.properties = state.properties.filter(p=>p.id!==id);
   saveState();
   render();
+}
+
+function renderBuildingForm(){
+  const b = editingBuildingId ? buildingById(editingBuildingId) : {nombre:'', direccion:''};
+  return `
+    <h2 class="section">${editingBuildingId?'Editar edificio':'Nuevo edificio'}</h2>
+    <div class="card">
+      <label for="bf-nombre">Nombre del edificio</label>
+      <input type="text" id="bf-nombre" placeholder="Torre A, Edificio Roble..." value="${b.nombre||''}">
+      <label for="bf-direccion">Dirección (opcional)</label>
+      <input type="text" id="bf-direccion" placeholder="Calle, número, colonia" value="${b.direccion||''}">
+    </div>
+    <div class="btn-row">
+      ${editingBuildingId ? `<button class="btn danger" onclick="deleteBuilding('${editingBuildingId}')">Eliminar</button>` : `<button class="btn" onclick="setView('properties')">Cancelar</button>`}
+      <button class="btn primary" onclick="saveBuilding()">Guardar</button>
+    </div>
+  `;
+}
+
+function editBuilding(id){ editingBuildingId = id; view='buildingForm'; render(); }
+
+function saveBuilding(){
+  const nombre = document.getElementById('bf-nombre').value.trim();
+  const direccion = document.getElementById('bf-direccion').value.trim();
+  if(!nombre){ showToast('Escribe un nombre para el edificio'); return; }
+  if(editingBuildingId){
+    const b = buildingById(editingBuildingId);
+    Object.assign(b, {nombre, direccion});
+  } else {
+    state.buildings.push({id:uid(), nombre, direccion});
+  }
+  saveState();
+  showToast('Edificio guardado');
+  setView('properties');
+}
+
+function deleteBuilding(id){
+  if(!confirm('¿Eliminar este edificio? Los departamentos y gastos ligados a él quedarán como independientes/generales.')) return;
+  state.buildings = state.buildings.filter(b=>b.id!==id);
+  state.properties.forEach(p=>{ if(p.edificioId===id) p.edificioId=''; });
+  state.expenses.forEach(g=>{ if(g.edificioId===id) g.edificioId=''; });
+  saveState();
+  setView('properties');
 }
 
 function savePayment(){
@@ -1354,7 +1566,7 @@ async function shareReceipt(id){
     ? '\n' + p.costos.map(c=>`${c.concepto}: ${fmtMoney(c.monto)}`).join('\n')
     : '';
   const pendienteTxt = entry && entry.estado==='parcial' ? `\nPendiente: ${fmtMoney(entry.faltante)}` : '';
-  const text = `Recibo de renta No. ${folioStr}\nFecha: ${fmtDate(p.fecha)}\nDepartamento: ${prop?prop.nombre:''}\nInquilino: ${prop?prop.inquilino:''}\nPeriodo: ${p.periodo}\nMonto: ${fmtMoney(p.monto)}\nMétodo: ${p.metodo}${costosTxt}\nEstado: ${estadoTxt}${creditoTxt}${pendienteTxt}`;
+  const text = `Recibo de renta No. ${folioStr}\nFecha: ${fmtDate(p.fecha)}\nInquilino: ${prop?prop.inquilino:''}\nPeriodo: ${p.periodo}\nMonto: ${fmtMoney(p.monto)}\nMétodo: ${p.metodo}${costosTxt}\nEstado: ${estadoTxt}${creditoTxt}${pendienteTxt}`;
   if(navigator.share){
     try{ await navigator.share({title:'Recibo de renta', text}); }catch(e){}
   } else {
