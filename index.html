@@ -16,6 +16,7 @@
     --ledger: #6B8F71;
     --stamp: #B23A34;
     --gold: #C79A3E;
+    --info: #3E6E8C;
     --line: rgba(35,48,61,0.14);
     --radius: 10px;
     --shadow: 0 6px 18px rgba(35,48,61,0.10), 0 1px 3px rgba(35,48,61,0.08);
@@ -212,54 +213,90 @@
 
   /* Receipt */
   .receipt-wrap{ padding-top:6px; }
-  .receipt{
-    background:var(--card);
-    border-radius:6px;
+  .receipt-doc{
+    background:#fff;
+    border-radius:10px;
     box-shadow:var(--shadow);
-    position:relative;
-    padding:26px 22px 22px;
     overflow:hidden;
   }
-  .receipt::before{
-    content:"";
-    position:absolute; top:0; left:0; right:0; height:10px;
-    background-image: radial-gradient(circle 5px at 12px 0, transparent 5px, var(--paper) 5.5px);
-    background-size: 24px 10px;
-    background-repeat: repeat-x;
+  .receipt-banner{
+    background:var(--ink); color:var(--paper);
+    padding:18px 20px; display:flex; align-items:center; gap:14px;
   }
-  .receipt-head{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:14px;
+  .receipt-banner .icon-circle{
+    width:50px; height:50px; border-radius:50%; flex-shrink:0;
+    background:rgba(244,239,225,0.14);
+    display:flex; align-items:center; justify-content:center;
   }
-  .receipt-head .title{ font-family:'Special Elite',monospace; font-size:17px; }
-  .receipt-head .folio{
-    font-family:'Courier Prime',monospace; font-weight:700; font-size:13px;
-    color:var(--stamp); text-align:right;
+  .receipt-banner .banner-text{ flex:1; min-width:0; }
+  .receipt-banner .banner-title{ font-family:'Special Elite', monospace; font-size:18px; letter-spacing:1px; }
+  .receipt-banner .banner-sub{ font-size:11px; opacity:0.85; margin-top:4px; line-height:1.5; }
+  .receipt-banner .banner-sub b{ font-weight:600; }
+
+  .receipt-main{ padding:18px 18px 20px; }
+
+  .receipt-topline{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .status-pill{
+    font-size:10px; font-weight:700; letter-spacing:0.5px;
+    padding:4px 10px; border-radius:12px; text-transform:uppercase; white-space:nowrap;
   }
-  .receipt-line{
-    display:flex; justify-content:space-between; gap:10px;
-    padding:7px 0; border-bottom:1px dotted var(--line);
-    font-size:13.5px;
+  .status-pill.completo{ background:rgba(107,143,113,0.15); color:var(--ledger); }
+  .status-pill.parcial{ background:rgba(199,154,62,0.18); color:#8A6416; }
+  .status-pill.sobrepago{ background:rgba(62,110,140,0.14); color:var(--info); }
+  .receipt-no{ text-align:right; font-size:11px; color:var(--ink-soft); line-height:1.6; }
+  .receipt-no b{ color:var(--ink); font-family:'Courier Prime',monospace; font-size:13px; }
+
+  .receipt-parties{ display:flex; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+  .receipt-party{ flex:1; min-width:135px; }
+  .receipt-party .label{ font-size:10px; font-weight:700; letter-spacing:1px; color:var(--ink-soft); text-transform:uppercase; margin-bottom:6px; }
+  .receipt-party .name{ font-weight:700; font-size:13.5px; color:var(--ink); }
+  .receipt-party .line{ font-size:12px; color:var(--ink-soft); margin-top:2px; line-height:1.5; }
+
+
+  table.receipt-table{ width:100%; border-collapse:collapse; margin-bottom:2px; font-size:12px; }
+  .receipt-table thead th{
+    background:var(--ink); color:var(--paper);
+    font-size:9.5px; text-transform:uppercase; letter-spacing:0.4px;
+    padding:7px 8px; text-align:left; font-weight:600;
   }
-  .receipt-line .k{ color:var(--ink-soft); }
-  .receipt-line .v{ font-weight:600; text-align:right; }
-  .receipt-total{
-    display:flex; justify-content:space-between; align-items:baseline;
-    margin-top:16px; padding-top:12px; border-top:2px solid var(--ink);
+  .receipt-table thead th.num{ text-align:right; }
+  .receipt-table tbody td{ padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .receipt-table tbody td.num{ text-align:right; font-family:'Courier Prime',monospace; white-space:nowrap; }
+  .receipt-table tbody tr:last-child td{ border-bottom:none; }
+  .receipt-table tbody tr:nth-child(even){ background:var(--paper); }
+
+  .receipt-totals{ margin-top:12px; margin-left:auto; width:100%; max-width:230px; }
+  .receipt-totals .row{ display:flex; justify-content:space-between; font-size:11.5px; padding:4px 0; color:var(--ink-soft); }
+  .receipt-totals .row b{ color:var(--ink); font-weight:600; }
+  .receipt-totals .final{
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(107,143,113,0.15); border-radius:8px;
+    padding:10px 12px; margin-top:8px;
   }
-  .receipt-total .k{ font-family:'Special Elite',monospace; font-size:13px; }
-  .receipt-total .v{ font-family:'Courier Prime',monospace; font-weight:700; font-size:22px; color:var(--ledger); }
-  .stamp-mark{
-    position:absolute; top:56px; right:18px;
-    border:3px solid var(--stamp); color:var(--stamp);
-    font-family:'Special Elite',monospace; font-size:13px;
-    padding:5px 10px; border-radius:6px;
-    transform:rotate(-9deg);
-    opacity:0.82;
-    letter-spacing:1.5px;
+  .receipt-totals .final.parcial{ background:rgba(199,154,62,0.18); }
+  .receipt-totals .final.sobrepago{ background:rgba(62,110,140,0.14); }
+  .receipt-totals .final .k{ font-weight:700; font-size:12px; color:var(--ink); text-transform:uppercase; letter-spacing:0.3px; }
+  .receipt-totals .final .v{ font-family:'Courier Prime',monospace; font-weight:700; font-size:19px; color:var(--ledger); }
+  .receipt-totals .final.parcial .v{ color:#8A6416; }
+  .receipt-totals .final.sobrepago .v{ color:var(--info); }
+
+  .receipt-letras{ margin-top:8px; font-size:11px; color:var(--ink-soft); font-style:italic; text-align:right; }
+
+  .receipt-remarks{ margin-top:16px; padding-top:12px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-soft); }
+  .receipt-remarks b{ color:var(--ink); }
+
+  .landlord-note{
+    margin-top:14px; padding:14px 16px;
+    background:var(--paper-dark); border:1px dashed var(--line); border-radius:10px;
   }
-  .receipt-notes{ margin-top:14px; font-size:12.5px; color:var(--ink-soft); font-style:italic; }
-  .receipt-foot{ margin-top:20px; font-size:11px; color:var(--ink-soft); text-align:center; letter-spacing:0.4px; }
+  .landlord-note-title{ font-size:10.5px; font-weight:700; letter-spacing:0.4px; color:var(--ink-soft); text-transform:uppercase; margin-bottom:8px; }
+  .row{ display:flex; justify-content:space-between; gap:10px; font-size:12px; padding:4px 0; color:var(--ink-soft); }
+  .row b{ color:var(--ink); font-weight:600; }
+  .ln-sub{ font-size:10.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.3px; margin:8px 0 4px; }
+
+  .receipt-detail{ margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+  .receipt-detail-title{ font-size:10.5px; font-weight:700; letter-spacing:0.5px; color:var(--ink-soft); text-transform:uppercase; margin-bottom:8px; }
+
 
   .toast{
     position:fixed; bottom:96px; left:50%; transform:translateX(-50%);
@@ -279,6 +316,7 @@
   .badge.con{ background:rgba(178,58,52,0.12); color:var(--stamp); }
   .badge.sin{ background:rgba(107,143,113,0.15); color:var(--ledger); }
   .badge.pordefinir{ background:rgba(91,107,122,0.12); color:var(--ink-soft); }
+  .badge.porvencer{ background:rgba(199,154,62,0.18); color:#8A6416; }
 
   .reminder-card{
     display:flex; justify-content:space-between; align-items:flex-start;
@@ -287,6 +325,9 @@
   .reminder-card:last-child{ border-bottom:none; }
   .reminder-card .name{ font-weight:700; font-size:15px; }
   .reminder-card .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
+  .reminder-item{ padding:14px 4px; border-bottom:1px dashed var(--line); }
+  .reminder-item:last-child{ border-bottom:none; }
+  .reminder-item .reminder-card{ padding:0 0 4px 0; border-bottom:none; }
   .reminder-days{
     font-family:'Courier Prime',monospace; font-weight:700; font-size:13px;
     text-align:right; white-space:nowrap; padding-left:10px;
@@ -306,12 +347,40 @@
   }
   .alert-card .txt{ color:var(--stamp); font-weight:600; line-height:1.4; }
 
+  .seg-row{ display:flex; gap:8px; margin-bottom:2px; }
+  .seg-btn{
+    flex:1; padding:10px 8px; border-radius:8px;
+    border:1.5px solid var(--line); background:#fff; color:var(--ink-soft);
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
+    cursor:pointer; text-align:center;
+  }
+  .seg-btn.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  input[readonly]{ background:var(--paper-dark); color:var(--ink-soft); }
+  .pay-summary{ font-size:12px; margin:6px 2px 0; line-height:1.5; min-height:15px; }
+  .pay-summary.short{ color:var(--stamp); }
+  .pay-summary.complete{ color:var(--ledger); }
+  .tag-parcial{
+    display:inline-block; font-size:10px; font-weight:700;
+    background:rgba(199,154,62,0.18); color:#8A6416;
+    padding:2px 7px; border-radius:10px; margin-left:6px;
+    letter-spacing:0.3px; vertical-align:middle;
+  }
+  .tag-sobrepago{
+    display:inline-block; font-size:10px; font-weight:700;
+    background:rgba(62,110,140,0.14); color:var(--info);
+    padding:2px 7px; border-radius:10px; margin-left:6px;
+    letter-spacing:0.3px; vertical-align:middle;
+  }
+
   @media print{
     body{ background:#fff; }
-    .topbar, .navbar, .btn-row, .cta, h2.section{ display:none !important; }
+    .topbar, .navbar, .btn-row, .cta, h2.section, .landlord-note{ display:none !important; }
     #app{ max-width:100%; padding:0; }
     .content{ padding:0; }
-    .receipt{ box-shadow:none; border:1px solid #999; }
+    .receipt-doc{ box-shadow:none; border:1px solid #999; }
+    .receipt-banner, .receipt-table thead th, .status-pill, .receipt-totals .final{
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
   }
 </style>
 </head>
@@ -325,7 +394,10 @@ let state = { properties: [], payments: [], nextFolio: 1, settings: { landlordNa
 let view = 'home';
 let activeReceiptId = null;
 let editingPropId = null;
+let renewingPropId = null;
 let selectedPropForNewPayment = null;
+let paymentTipo = 'completo';
+let costosAdicionales = [];
 let historyFilter = '';
 
 function loadState(){
@@ -360,6 +432,50 @@ function fmtMoney(n){
   const num = Number(n)||0;
   return num.toLocaleString('es-MX', {style:'currency', currency:'MXN'});
 }
+
+const LETRAS_UNIDADES = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez",
+  "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte",
+  "veintiún", "veintidós", "veintitrés", "veinticuatro", "veinticinco", "veintiséis", "veintisiete", "veintiocho", "veintinueve"];
+const LETRAS_DECENAS = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+const LETRAS_CENTENAS = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
+
+function letrasDecenas(n){
+  if(n<=29) return LETRAS_UNIDADES[n];
+  const dec = Math.floor(n/10), uni = n%10;
+  if(uni===0) return LETRAS_DECENAS[dec];
+  return LETRAS_DECENAS[dec] + ' y ' + LETRAS_UNIDADES[uni];
+}
+function letrasCentenas(n){
+  if(n===0) return '';
+  if(n===100) return 'cien';
+  const cen = Math.floor(n/100), resto = n%100;
+  let str = cen>0 ? LETRAS_CENTENAS[cen] : '';
+  if(resto>0) str += (str?' ':'') + letrasDecenas(resto);
+  return str.trim();
+}
+function montoEnLetras(num){
+  num = Math.round((Number(num)||0)*100)/100;
+  const entero = Math.floor(num);
+  const centavos = Math.round((num-entero)*100);
+  let texto;
+  let usarDe = false;
+  if(entero===0){
+    texto = 'cero';
+  } else {
+    const millones = Math.floor(entero/1000000);
+    const miles = Math.floor((entero%1000000)/1000);
+    const cientos = entero%1000;
+    let partes = [];
+    if(millones>0) partes.push(millones===1 ? 'un millón' : letrasCentenas(millones) + ' millones');
+    if(miles>0) partes.push(miles===1 ? 'mil' : letrasCentenas(miles) + ' mil');
+    if(cientos>0) partes.push(letrasCentenas(cientos));
+    texto = partes.join(' ').trim();
+    usarDe = millones>0 && miles===0 && cientos===0;
+  }
+  texto = texto.charAt(0).toUpperCase() + texto.slice(1);
+  return `${texto} ${usarDe?'de pesos':'pesos'} ${String(centavos).padStart(2,'0')}/100 M.N.`;
+}
+
 function fmtDate(d){
   const dt = new Date(d+'T00:00:00');
   return dt.toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'});
@@ -368,10 +484,27 @@ function todayISO(){
   const d = new Date();
   return d.toISOString().slice(0,10);
 }
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 function currentMonthLabel(){
-  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const d = new Date();
-  return meses[d.getMonth()]+' '+d.getFullYear();
+  return MESES[d.getMonth()]+' '+d.getFullYear();
+}
+function mesOptions(selectedMes){
+  return MESES.map(m=>`<option ${m===selectedMes?'selected':''}>${m}</option>`).join('');
+}
+function anioOptions(selectedAnio){
+  const actual = new Date().getFullYear();
+  let opts = '';
+  for(let y=actual-1; y<=actual+2; y++){
+    opts += `<option value="${y}" ${y===selectedAnio?'selected':''}>${y}</option>`;
+  }
+  return opts;
+}
+function getNPPeriodo(){
+  const mesEl = document.getElementById('np-mes');
+  const anioEl = document.getElementById('np-anio');
+  if(!mesEl || !anioEl) return '';
+  return mesEl.value + ' ' + anioEl.value;
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
@@ -382,21 +515,94 @@ function daysUntil(dateStr){
   const target = new Date(dateStr+'T00:00:00');
   return Math.round((target-today)/86400000);
 }
-function aumentoBadge(p){
-  const val = p.aumento || 'Por definir';
-  if(val==='Con aumento') return `<span class="badge con">Con aumento${p.porcentajeAumento?' · '+p.porcentajeAumento:''}</span>`;
-  if(val==='Sin aumento') return `<span class="badge sin">Sin aumento</span>`;
-  return `<span class="badge pordefinir">Por definir</span>`;
+function vencimientoBadge(p){
+  if(!p.fechaRenovacion) return '';
+  const days = daysUntil(p.fechaRenovacion);
+  if(days<0) return `<span class="badge con">Vencido</span>`;
+  if(days<=30) return `<span class="badge porvencer">Por vencer</span>`;
+  return `<span class="badge sin">Vigente</span>`;
 }
-function upcomingRenewals(withinDays){
+function upcomingByField(field, withinDays){
   return state.properties
-    .filter(p=>p.fechaRenovacion)
-    .map(p=>({p, days:daysUntil(p.fechaRenovacion)}))
+    .filter(p=>p[field])
+    .map(p=>({p, days:daysUntil(p[field])}))
     .filter(x=>x.days<=withinDays)
     .sort((a,b)=>a.days-b.days);
 }
 
-function setView(v){ view = v; activeReceiptId=null; editingPropId=null; render(); window.scrollTo(0,0); }
+function periodoSortKey(periodoStr){
+  const parts = (periodoStr||'').trim().split(/\s+/);
+  const idx = MESES.findIndex(m=>m.toLowerCase()===(parts[0]||'').toLowerCase());
+  const anio = parseInt(parts[1],10)||0;
+  return anio*12 + (idx>=0?idx:0);
+}
+
+// Calcula, en orden cronológico, el estado de cada periodo de un depto considerando
+// el crédito (sobrepago) que se traslada automáticamente de un periodo al siguiente.
+function costosTotal(pago){
+  return (pago.costos||[]).reduce((s,c)=>s+(Number(c.monto)||0),0);
+}
+
+function buildPeriodLedger(propId){
+  const prop = propById(propId);
+  const rentaBase = prop ? Number(prop.renta)||0 : 0;
+  const byPeriodo = {};
+  state.payments.filter(x=>x.propId===propId).forEach(x=>{
+    const key = x.periodo.trim();
+    if(!byPeriodo[key]) byPeriodo[key] = [];
+    byPeriodo[key].push(x);
+  });
+  const periodos = Object.keys(byPeriodo).sort((a,b)=>periodoSortKey(a)-periodoSortKey(b));
+  const ledger = {};
+  let creditCarry = 0;
+  let creditOrigen = null;
+  periodos.forEach(key=>{
+    const pagos = byPeriodo[key].slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.folio-b.folio);
+    const totalPagado = pagos.reduce((s,x)=>s+Number(x.monto),0);
+    const costosPeriodo = pagos.reduce((s,x)=>s+costosTotal(x),0);
+    const rentaEsperada = rentaBase + costosPeriodo;
+    const creditoInicial = creditCarry;
+    const creditoInicialOrigen = creditOrigen;
+    const disponible = totalPagado + creditoInicial;
+    let estado = 'completo', creditoFinal = 0, faltante = 0;
+    if(rentaEsperada>0){
+      if(disponible < rentaEsperada){ estado = 'parcial'; faltante = rentaEsperada - disponible; }
+      else if(disponible > rentaEsperada){ estado = 'sobrepago'; creditoFinal = disponible - rentaEsperada; }
+    }
+    ledger[key] = { periodo:key, pagos, totalPagado, costosPeriodo, rentaBase, rentaEsperada, creditoInicial, creditoInicialOrigen, disponible, estado, creditoFinal, faltante };
+    creditCarry = creditoFinal;
+    creditOrigen = creditoFinal>0 ? key : null;
+  });
+  return ledger;
+}
+
+// Crédito disponible al empezar un periodo (aunque ese periodo todavía no tenga pagos registrados)
+function creditoAlEntrarPeriodo(propId, periodoStr){
+  const ledger = buildPeriodLedger(propId);
+  const key = (periodoStr||'').trim();
+  if(ledger[key]) return { monto: ledger[key].creditoInicial, origen: ledger[key].creditoInicialOrigen };
+  const targetKey = periodoSortKey(key);
+  let best = null;
+  Object.values(ledger).forEach(entry=>{
+    const k = periodoSortKey(entry.periodo);
+    if(k < targetKey && (!best || k > periodoSortKey(best.periodo))) best = entry;
+  });
+  return best ? { monto: best.creditoFinal, origen: best.creditoFinal>0 ? best.periodo : null } : { monto:0, origen:null };
+}
+
+function paymentStatusTag(p){
+  const prop = propById(p.propId);
+  const renta = prop ? Number(prop.renta)||0 : 0;
+  if(!renta) return p.tipoPago==='parcial' ? '<span class="tag-parcial">PARCIAL</span>' : '';
+  const ledger = buildPeriodLedger(p.propId);
+  const entry = ledger[p.periodo.trim()];
+  if(!entry) return '';
+  if(entry.estado==='parcial') return '<span class="tag-parcial">PARCIAL</span>';
+  if(entry.estado==='sobrepago') return '<span class="tag-sobrepago">SOBREPAGO</span>';
+  return '';
+}
+
+function setView(v){ view = v; activeReceiptId=null; editingPropId=null; renewingPropId=null; render(); window.scrollTo(0,0); }
 
 /* ---------- RENDER ---------- */
 function render(){
@@ -427,6 +633,7 @@ function render(){
       <button class="${view==='reminders'?'active':''}" onclick="setView('reminders')"><span class="ic">⏰</span><span class="lb">Avisos</span></button>
     </div>`;
   app.innerHTML = html;
+  if(view==='newPayment' && state.properties.length) updatePaymentSummary();
 }
 
 function renderHome(){
@@ -438,18 +645,22 @@ function renderHome(){
     const prop = propById(p.propId);
     return `<div class="payment-row" onclick="openReceipt('${p.id}')">
       <div><div class="who">${prop?prop.nombre:'—'}</div><div class="meta">${p.periodo} · ${fmtDate(p.fecha)}</div></div>
-      <div class="amt">${fmtMoney(p.monto)}</div>
+      <div class="amt">${fmtMoney(p.monto)}${paymentStatusTag(p)}</div>
     </div>`;
   }).join('');
   if(!recientes.length) rows = `<div class="empty">Aún no registras pagos.<br>Toca "Cobrar" para generar tu primer recibo.</div>`;
 
-  const upcoming = upcomingRenewals(30);
+  const upcomingVenc = upcomingByField('fechaRenovacion', 30).map(x=>Object.assign({tipo:'vencimiento'}, x));
+  const upcomingAum = upcomingByField('fechaAumento', 30).map(x=>Object.assign({tipo:'aumento'}, x));
+  const upcoming = [...upcomingVenc, ...upcomingAum].sort((a,b)=>a.days-b.days);
   let alertHtml = '';
   if(upcoming.length){
     const first = upcoming[0];
+    const dayTxt = first.days<0?'hace '+Math.abs(first.days)+' días (¡vencido!)':first.days===0?'hoy':'en '+first.days+' días';
+    const accionTxt = first.tipo==='vencimiento' ? 'vence contrato' : 'toca aumento de renta';
     const msg = upcoming.length===1
-      ? `${first.p.nombre} renueva contrato ${first.days<0?'hace '+Math.abs(first.days)+' días (¡vencido!)':first.days===0?'hoy':'en '+first.days+' días'}`
-      : `${upcoming.length} contratos por renovar en los próximos 30 días`;
+      ? `${first.p.nombre} ${accionTxt} ${dayTxt}`
+      : `${upcoming.length} asuntos por revisar en los próximos 30 días`;
     alertHtml = `<div class="alert-card" onclick="setView('reminders')"><span class="txt">⏰ ${msg}</span><span>›</span></div>`;
   }
 
@@ -473,7 +684,9 @@ function renderProperties(){
         <div class="sub">Inquilino: ${p.inquilino||'—'}${p.direccion?'<br>'+p.direccion:''}</div>
         <div class="rent">Renta base: ${fmtMoney(p.renta)}</div>
         ${p.fechaIngreso || p.deposito ? `<div class="sub">${p.fechaIngreso?'Ingresó: '+fmtDate(p.fechaIngreso):''}${p.fechaIngreso && p.deposito?' · ':''}${p.deposito?'Depósito: '+fmtMoney(p.deposito):''}</div>` : ''}
-        ${p.fechaRenovacion ? `<div class="sub">Renovación: ${fmtDate(p.fechaRenovacion)}</div>${aumentoBadge(p)}` : ''}
+        ${p.fechaUltimaRenovacion ? `<div class="sub" style="margin-top:5px;">Última renovación: ${fmtDate(p.fechaUltimaRenovacion)}</div>` : ''}
+        ${p.fechaRenovacion ? `<div class="sub">Próx. vencimiento: ${fmtDate(p.fechaRenovacion)}</div>${vencimientoBadge(p)}` : ''}
+        ${p.fechaAumento ? `<div class="sub" style="margin-top:5px;">Próx. aumento de renta: ${fmtDate(p.fechaAumento)}</div>` : ''}
       </div>
       <div>
         <button class="icon-btn" onclick="editProp('${p.id}')" aria-label="Editar">✎</button>
@@ -490,8 +703,7 @@ function renderProperties(){
 }
 
 function renderPropForm(){
-  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',fechaRenovacion:'',aumento:'Por definir',porcentajeAumento:'',notasRenovacion:''};
-  const aumentoVal = p.aumento || 'Por definir';
+  const p = editingPropId ? propById(editingPropId) : {nombre:'',inquilino:'',direccion:'',renta:'',fechaIngreso:'',deposito:'',fechaUltimaRenovacion:'',fechaRenovacion:'',fechaAumento:'',notasRenovacion:''};
   return `
     <h2 class="section">${editingPropId?'Editar departamento':'Nuevo departamento'}</h2>
     <div class="card">
@@ -508,21 +720,16 @@ function renderPropForm(){
       <label for="pf-deposito">Monto del depósito</label>
       <input type="number" id="pf-deposito" placeholder="0.00" value="${p.deposito||''}">
     </div>
+
     <h2 class="section">Renovación de contrato</h2>
     <div class="card">
-      <label for="pf-fecharenovacion">Fecha de renovación / vencimiento</label>
+      <label for="pf-fechaultima">Fecha de última renovación</label>
+      <input type="date" id="pf-fechaultima" value="${p.fechaUltimaRenovacion||''}">
+      <label for="pf-fecharenovacion">Próxima fecha de vencimiento</label>
       <input type="date" id="pf-fecharenovacion" value="${p.fechaRenovacion||''}">
-      <label for="pf-aumento">¿Se renueva con aumento?</label>
-      <select id="pf-aumento" onchange="toggleAumentoPct(this.value)">
-        <option ${aumentoVal==='Por definir'?'selected':''}>Por definir</option>
-        <option ${aumentoVal==='Con aumento'?'selected':''}>Con aumento</option>
-        <option ${aumentoVal==='Sin aumento'?'selected':''}>Sin aumento</option>
-      </select>
-      <div id="pf-pct-wrap" style="display:${aumentoVal==='Con aumento'?'block':'none'}">
-        <label for="pf-pct">Porcentaje o monto de aumento (opcional)</label>
-        <input type="text" id="pf-pct" placeholder="Ej. 10% o $500" value="${p.porcentajeAumento||''}">
-      </div>
-      <label for="pf-notasrenovacion">Notas de renovación (opcional)</label>
+      <label for="pf-fechaaumento">Próxima fecha de aumento de renta</label>
+      <input type="date" id="pf-fechaaumento" value="${p.fechaAumento||''}">
+      <label for="pf-notasrenovacion">Notas (opcional)</label>
       <textarea id="pf-notasrenovacion" placeholder="Ej. avisar al inquilino con 30 días de anticipación">${p.notasRenovacion||''}</textarea>
     </div>
     <div class="btn-row">
@@ -532,8 +739,45 @@ function renderPropForm(){
   `;
 }
 
-function toggleAumentoPct(val){
-  document.getElementById('pf-pct-wrap').style.display = (val==='Con aumento') ? 'block' : 'none';
+function costosAdicionalesTotal(){
+  return costosAdicionales.reduce((s,c)=>s+(Number(c.monto)||0),0);
+}
+function montoSugeridoCompleto(prop){
+  return (Number(prop.renta)||0) + costosAdicionalesTotal();
+}
+function renderCostosRows(){
+  return costosAdicionales.map((c,i)=>`
+    <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+      <input type="text" placeholder="Concepto (Ej. Luz)" value="${c.concepto||''}" oninput="updateCosto(${i},'concepto',this.value)" style="flex:1.4;">
+      <input type="number" placeholder="Monto" value="${c.monto||''}" oninput="updateCosto(${i},'monto',this.value)" style="flex:1;">
+      <button type="button" class="icon-btn" onclick="removeCosto(${i})" aria-label="Quitar costo">✕</button>
+    </div>`).join('');
+}
+function refreshCostosList(){
+  const el = document.getElementById('np-costos-list');
+  if(el) el.innerHTML = renderCostosRows();
+  syncMontoIfCompleto();
+  updatePaymentSummary();
+}
+function syncMontoIfCompleto(){
+  if(paymentTipo!=='completo') return;
+  const propEl = document.getElementById('np-prop');
+  const montoInput = document.getElementById('np-monto');
+  if(!propEl || !montoInput) return;
+  const prop = propById(propEl.value);
+  if(prop) montoInput.value = montoSugeridoCompleto(prop) || '';
+}
+function addCosto(){
+  costosAdicionales.push({concepto:'', monto:''});
+  refreshCostosList();
+}
+function removeCosto(i){
+  costosAdicionales.splice(i,1);
+  refreshCostosList();
+}
+function updateCosto(i, field, val){
+  costosAdicionales[i][field] = val;
+  if(field==='monto'){ syncMontoIfCompleto(); updatePaymentSummary(); }
 }
 
 function renderNewPayment(){
@@ -553,17 +797,33 @@ function renderNewPayment(){
       <label for="np-fecha">Fecha de pago</label>
       <input type="date" id="np-fecha" value="${todayISO()}">
 
-      <label for="np-periodo">Periodo que cubre</label>
-      <input type="text" id="np-periodo" value="${currentMonthLabel()}" placeholder="Ej. Agosto 2026">
+      <label>Periodo que cubre</label>
+      <div style="display:flex; gap:8px;">
+        <select id="np-mes" style="flex:1.4;" onchange="updatePaymentSummary()">${mesOptions(MESES[new Date().getMonth()])}</select>
+        <select id="np-anio" style="flex:1;" onchange="updatePaymentSummary()">${anioOptions(new Date().getFullYear())}</select>
+      </div>
 
-      <label for="np-monto">Monto recibido</label>
-      <input type="number" id="np-monto" value="${prop.renta||''}">
+      <label>Tipo de pago</label>
+      <div class="seg-row">
+        <button type="button" class="seg-btn ${paymentTipo==='completo'?'active':''}" onclick="setTipoPago('completo', this)">Renta completa</button>
+        <button type="button" class="seg-btn ${paymentTipo==='parcial'?'active':''}" onclick="setTipoPago('parcial', this)">Otro monto</button>
+      </div>
+
+      <label>Costos adicionales (opcional)</label>
+      <div style="font-size:11.5px; color:var(--ink-soft); margin:-4px 0 8px;">Luz, agua, internet u otros gastos que pagaste y le cobras al inquilino.</div>
+      <div id="np-costos-list">${renderCostosRows()}</div>
+      <button type="button" class="btn" style="width:100%;" onclick="addCosto()">+ Agregar costo</button>
+
+      <label for="np-monto" style="margin-top:14px;">Monto recibido</label>
+      <input type="number" id="np-monto" value="${paymentTipo==='completo'?(montoSugeridoCompleto(prop)||''):''}" ${paymentTipo==='completo'?'readonly':''} oninput="updatePaymentSummary()">
+      <div class="pay-summary" id="np-summary"></div>
 
       <label for="np-metodo">Método de pago</label>
       <select id="np-metodo">
         <option>Efectivo</option>
         <option>Transferencia</option>
         <option>Depósito</option>
+        <option>Retiro sin tarjeta</option>
         <option>Otro</option>
       </select>
 
@@ -585,7 +845,7 @@ function renderHistory(){
     const prop = propById(p.propId);
     return `<div class="payment-row" onclick="openReceipt('${p.id}')">
       <div><div class="who">${prop?prop.nombre:'—'} · Folio ${String(p.folio).padStart(4,'0')}</div><div class="meta">${p.periodo} · ${fmtDate(p.fecha)}</div></div>
-      <div class="amt">${fmtMoney(p.monto)}</div>
+      <div class="amt">${fmtMoney(p.monto)}${paymentStatusTag(p)}</div>
     </div>`;
   }).join('');
   if(!list.length) rows = `<div class="empty">No hay pagos con ese filtro.</div>`;
@@ -602,24 +862,164 @@ function renderReceipt(){
   if(!p) return `<div class="empty">Recibo no encontrado.</div>`;
   const prop = propById(p.propId);
   const folioStr = String(p.folio).padStart(4,'0');
+  const rentaBase = prop ? Number(prop.renta)||0 : 0;
+  const monto = Number(p.monto)||0;
+
+  const ledger = buildPeriodLedger(p.propId);
+  const entry = ledger[p.periodo.trim()] || {
+    pagos:[p], totalPagado:monto, costosPeriodo:costosTotal(p), rentaBase, rentaEsperada: rentaBase+costosTotal(p),
+    creditoInicial:0, creditoInicialOrigen:null,
+    disponible:monto, estado: rentaBase ? (monto<(rentaBase+costosTotal(p))?'parcial':monto>(rentaBase+costosTotal(p))?'sobrepago':'completo') : (p.tipoPago==='parcial'?'parcial':'completo'),
+    creditoFinal:0, faltante:0
+  };
+
+  const estado = entry.estado;
+  const pagosPeriodo = entry.pagos;
+  const creditoInicial = entry.creditoInicial;
+  const creditoOrigen = entry.creditoInicialOrigen;
+
+  // Costos adicionales registrados en ESTE pago (luz, agua, internet, etc.) — van en su propio renglón
+  const misCostos = p.costos || [];
+  const misCostosTotal = costosTotal(p);
+
+  // Cuánto de la renta base (sin costos) ya se cubrió antes de este pago, dentro del mismo periodo
+  const idxEnPeriodo = Math.max(0, pagosPeriodo.findIndex(x=>x.id===p.id));
+  const pagadoParaRentaAntes = pagosPeriodo.slice(0, idxEnPeriodo).reduce((s,x)=>{
+    return s + Math.max(0, Number(x.monto) - costosTotal(x));
+  }, 0);
+  const disponibleAntesDeEste = creditoInicial + pagadoParaRentaAntes;
+  const montoTrasCostos = Math.max(0, monto - misCostosTotal);
+  const montoParaRenta = rentaBase ? Math.max(0, Math.min(montoTrasCostos, rentaBase - disponibleAntesDeEste)) : montoTrasCostos;
+  const montoExcedente = rentaBase ? Math.max(0, montoTrasCostos - montoParaRenta) : 0;
+  const concepto = `Renta — ${p.periodo}${prop?' ('+prop.nombre+')':''}`;
+
+  let itemRows = '';
+  if(montoParaRenta > 0){
+    itemRows += `<tr><td>${concepto}</td><td class="num">${fmtMoney(montoParaRenta)}</td></tr>`;
+  }
+  misCostos.forEach(c=>{
+    if(Number(c.monto)>0){
+      itemRows += `<tr><td>${c.concepto||'Costo adicional'}</td><td class="num">${fmtMoney(c.monto)}</td></tr>`;
+    }
+  });
+  if(montoExcedente > 0){
+    itemRows += `<tr><td>Abono a pagos futuros</td><td class="num">${fmtMoney(montoExcedente)}</td></tr>`;
+  }
+  if(!itemRows){
+    itemRows = `<tr><td>${concepto}</td><td class="num">${fmtMoney(monto)}</td></tr>`;
+  }
+
+  const pillLabel = estado==='parcial' ? 'Pago parcial' : estado==='sobrepago' ? 'Sobrepago' : 'Pagado';
+  const finalLabel = estado==='parcial' ? 'Recibido en este abono' : estado==='sobrepago' ? 'Recibido (incl. excedente)' : 'Total pagado';
+
+  // Desglose del periodo — visible para el inquilino (renta base, costos, crédito aplicado, pagos del periodo, pendiente/crédito futuro)
+  let detalleRows = '';
+  if(rentaBase){
+    detalleRows += `<div class="row"><span>Renta base del periodo</span><b>${fmtMoney(rentaBase)}</b></div>`;
+  }
+  if(entry.costosPeriodo>0){
+    detalleRows += `<div class="row"><span>Costos adicionales del periodo</span><b>${fmtMoney(entry.costosPeriodo)}</b></div>`;
+    detalleRows += `<div class="row"><span>Total esperado (renta + costos)</span><b>${fmtMoney(entry.rentaEsperada)}</b></div>`;
+  }
+  if(creditoInicial>0){
+    detalleRows += `<div class="row"><span>Crédito de ${creditoOrigen||'periodo anterior'}</span><b>${fmtMoney(creditoInicial)}</b></div>`;
+  }
+  if(pagosPeriodo.length > 1){
+    detalleRows += `<div class="ln-sub">Pagos registrados en "${p.periodo}":</div>`;
+    detalleRows += pagosPeriodo.map(x=>`<div class="row"><span>${fmtDate(x.fecha)}${x.id===p.id?' · este recibo':''}</span><b>${fmtMoney(x.monto)}</b></div>`).join('');
+  }
+  if(creditoInicial>0 || pagosPeriodo.length>1){
+    detalleRows += `<div class="row" style="border-top:1px solid var(--line); margin-top:4px; padding-top:6px;"><span><b>Disponible del periodo</b></span><b>${fmtMoney(entry.disponible)}</b></div>`;
+  }
+  if(entry.estado==='parcial'){
+    detalleRows += `<div class="row"><span>Pendiente</span><b>${fmtMoney(entry.faltante)}</b></div>`;
+  } else if(entry.estado==='sobrepago'){
+    detalleRows += `<div class="row"><span>Crédito para el siguiente periodo</span><b>${fmtMoney(entry.creditoFinal)}</b></div>`;
+  }
+
+  // Notas del recibo, incluyendo próximas fechas de renovación / aumento de renta
+  let notasExtra = [];
+  if(prop && prop.fechaRenovacion) notasExtra.push(`Próxima renovación de contrato: ${fmtDate(prop.fechaRenovacion)}.`);
+  if(prop && prop.fechaAumento) notasExtra.push(`Próximo aumento de renta: ${fmtDate(prop.fechaAumento)}.`);
+  const notasBase = p.notas ? p.notas : 'Pago realizado por '+p.metodo.toLowerCase()+'.';
+  const notasFinal = [notasBase, ...notasExtra].join(' ');
+
+  // Panel privado (solo para el arrendador): el mismo desglose + generales del inquilino/depto
+  let generalesRows = '';
+  if(prop){
+    if(prop.deposito) generalesRows += `<div class="row"><span>Depósito</span><b>${fmtMoney(prop.deposito)}</b></div>`;
+    if(prop.fechaUltimaRenovacion) generalesRows += `<div class="row"><span>Última renovación</span><b>${fmtDate(prop.fechaUltimaRenovacion)}</b></div>`;
+    if(prop.fechaRenovacion) generalesRows += `<div class="row"><span>Próxima renovación</span><b>${fmtDate(prop.fechaRenovacion)}</b></div>`;
+    if(prop.fechaAumento) generalesRows += `<div class="row"><span>Próximo aumento de renta</span><b>${fmtDate(prop.fechaAumento)}</b></div>`;
+    if(prop.notasRenovacion) generalesRows += `<div class="row"><span>Notas del depto</span><b>${prop.notasRenovacion}</b></div>`;
+  }
+
   return `
     <div class="receipt-wrap">
-      <div class="receipt">
-        <div class="stamp-mark">PAGADO</div>
-        <div class="receipt-head">
-          <div class="title">Recibo de renta</div>
-          <div class="folio">No. ${folioStr}<br>${fmtDate(p.fecha)}</div>
+      <div class="receipt-doc">
+        <div class="receipt-banner">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--paper)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 11.5 12 4l9 7.5"/>
+              <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
+            </svg>
+          </div>
+          <div class="banner-text">
+            <div class="banner-title">RECIBO DE RENTA</div>
+            <div class="banner-sub"><b>${state.settings.landlordName||'Arrendador'}</b>${state.settings.landlordContact?'<br>'+state.settings.landlordContact:''}</div>
+          </div>
         </div>
-        <div class="receipt-line"><span class="k">Recibí de</span><span class="v">${prop?prop.inquilino||'—':'—'}</span></div>
-        <div class="receipt-line"><span class="k">Por concepto de</span><span class="v">Renta — ${prop?prop.nombre:'—'}</span></div>
-        ${prop && prop.direccion ? `<div class="receipt-line"><span class="k">Dirección</span><span class="v">${prop.direccion}</span></div>` : ''}
-        <div class="receipt-line"><span class="k">Periodo que cubre</span><span class="v">${p.periodo}</span></div>
-        <div class="receipt-line"><span class="k">Método de pago</span><span class="v">${p.metodo}</span></div>
-        ${state.settings.landlordName ? `<div class="receipt-line"><span class="k">Arrendador</span><span class="v">${state.settings.landlordName}</span></div>` : ''}
-        <div class="receipt-total"><span class="k">Total recibido</span><span class="v">${fmtMoney(p.monto)}</span></div>
-        ${p.notas ? `<div class="receipt-notes">Notas: ${p.notas}</div>` : ''}
-        <div class="receipt-foot">${state.settings.landlordName||'Arrendador'}${state.settings.landlordContact?' · '+state.settings.landlordContact:''}</div>
+        <div class="receipt-main">
+          <div class="receipt-topline">
+            <span class="status-pill ${estado}">${pillLabel}</span>
+            <div class="receipt-no">${fmtDate(p.fecha)}<br><b>Recibo No. ${folioStr}</b></div>
+          </div>
+
+          <div class="receipt-parties">
+            <div class="receipt-party">
+              <div class="label">Recibí de</div>
+              <div class="name">${prop?prop.inquilino||'—':'—'}</div>
+              ${prop && prop.direccion ? `<div class="line">${prop.direccion}</div>` : ''}
+            </div>
+            <div class="receipt-party">
+              <div class="label">Propiedad</div>
+              <div class="name">${prop?prop.nombre:'—'}</div>
+              <div class="line">Método: ${p.metodo}</div>
+            </div>
+          </div>
+
+          <table class="receipt-table">
+            <thead>
+              <tr><th>Descripción</th><th class="num">Monto</th></tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+
+          <div class="receipt-totals">
+            <div class="final ${estado}">
+              <span class="k">${finalLabel}</span>
+              <span class="v">${fmtMoney(monto)}</span>
+            </div>
+          </div>
+          <div class="receipt-letras">Son: ${montoEnLetras(monto)}</div>
+
+          ${detalleRows ? `
+          <div class="receipt-detail">
+            <div class="receipt-detail-title">Detalle del periodo</div>
+            ${detalleRows}
+          </div>` : ''}
+
+          <div class="receipt-remarks"><b>Notas:</b> ${notasFinal}</div>
+        </div>
       </div>
+
+      ${(detalleRows || generalesRows) ? `
+      <div class="landlord-note">
+        <div class="landlord-note-title">👁 Solo visible para ti</div>
+        ${detalleRows}
+        ${generalesRows ? `<div class="ln-sub" style="margin-top:${detalleRows?'12px':'0'};">Generales del inquilino / depto</div>${generalesRows}` : ''}
+      </div>` : ''}
+
       <div class="btn-row">
         <button class="btn" onclick="setView('history')">Volver</button>
         <button class="btn" onclick="shareReceipt('${p.id}')">Compartir</button>
@@ -630,37 +1030,83 @@ function renderReceipt(){
 }
 
 function renderReminders(){
-  const withDate = state.properties
-    .filter(p=>p.fechaRenovacion)
-    .map(p=>({p, days:daysUntil(p.fechaRenovacion)}))
-    .sort((a,b)=>a.days-b.days);
-  const withoutDate = state.properties.filter(p=>!p.fechaRenovacion);
+  const withVenc = upcomingByField('fechaRenovacion', Infinity);
+  const withAum = upcomingByField('fechaAumento', Infinity);
+  const sinNinguna = state.properties.filter(p=>!p.fechaRenovacion && !p.fechaAumento);
 
-  let rows = withDate.map(({p,days})=>{
+  let vencRows = withVenc.map(({p,days})=>{
     const cls = days<=30 ? 'urgent' : days<=90 ? 'soon' : 'later';
     const dayLabel = days<0 ? `Vencido hace ${Math.abs(days)}d` : days===0 ? 'Hoy' : `en ${days}d`;
+    const isOpen = renewingPropId===p.id;
+    return `<div class="reminder-item">
+      <div class="reminder-card">
+        <div>
+          <div class="name">${p.nombre}</div>
+          <div class="sub">Última renovación: ${p.fechaUltimaRenovacion?fmtDate(p.fechaUltimaRenovacion):'—'}</div>
+          <div class="sub">Vence: ${fmtDate(p.fechaRenovacion)}</div>
+          ${p.notasRenovacion?`<div class="sub" style="margin-top:6px;font-style:italic;">${p.notasRenovacion}</div>`:''}
+        </div>
+        <div style="text-align:right;">
+          <div class="reminder-days ${cls}">${dayLabel}</div>
+          <button class="icon-btn" onclick="editProp('${p.id}')" aria-label="Editar" style="margin-top:4px;">✎</button>
+        </div>
+      </div>
+      <button class="btn full" style="margin-top:8px;" onclick="toggleRenewForm('${p.id}')">${isOpen?'Cancelar':'🔄 Ya renové el contrato'}</button>
+      ${isOpen ? renderRenewForm(p) : ''}
+    </div>`;
+  }).join('');
+  if(!withVenc.length) vencRows = `<div class="empty">No tienes fechas de vencimiento registradas.<br>Agrégalas desde "Deptos" al editar cada departamento.</div>`;
+
+  let aumRows = withAum.map(({p,days})=>{
+    const cls = days<=30 ? 'urgent' : days<=90 ? 'soon' : 'later';
+    const dayLabel = days<0 ? `Venció hace ${Math.abs(days)}d` : days===0 ? 'Hoy' : `en ${days}d`;
     return `<div class="reminder-card" onclick="editProp('${p.id}')">
       <div>
         <div class="name">${p.nombre}</div>
-        <div class="sub">Vence: ${fmtDate(p.fechaRenovacion)}</div>
-        ${aumentoBadge(p)}
-        ${p.notasRenovacion?`<div class="sub" style="margin-top:6px;font-style:italic;">${p.notasRenovacion}</div>`:''}
+        <div class="sub">Aumenta: ${fmtDate(p.fechaAumento)}</div>
       </div>
       <div class="reminder-days ${cls}">${dayLabel}</div>
     </div>`;
   }).join('');
-  if(!withDate.length) rows = `<div class="empty">No tienes fechas de renovación registradas.<br>Agrégalas desde "Deptos" al editar cada departamento.</div>`;
+  if(!withAum.length) aumRows = `<div class="empty">No tienes fechas de aumento registradas.<br>Agrégalas desde "Deptos" al editar cada departamento.</div>`;
 
-  let withoutRows = withoutDate.map(p=>`
+  let sinRows = sinNinguna.map(p=>`
     <div class="reminder-card" onclick="editProp('${p.id}')">
-      <div><div class="name">${p.nombre}</div><div class="sub">Sin fecha de renovación registrada</div></div>
+      <div><div class="name">${p.nombre}</div><div class="sub">Sin fechas de vencimiento ni de aumento</div></div>
       <div class="icon-btn">✎</div>
     </div>`).join('');
 
   return `
-    <h2 class="section">Próximas renovaciones</h2>
-    <div class="card">${rows}</div>
-    ${withoutDate.length ? `<h2 class="section">Sin fecha registrada</h2><div class="card">${withoutRows}</div>` : ''}
+    <h2 class="section">Vencimiento de contrato</h2>
+    <div class="card">${vencRows}</div>
+    <h2 class="section">Aumento de renta</h2>
+    <div class="card">${aumRows}</div>
+    ${sinNinguna.length ? `<h2 class="section">Sin fechas registradas</h2><div class="card">${sinRows}</div>` : ''}
+  `;
+}
+
+function renderRenewForm(p){
+  return `
+    <div class="card" style="margin-top:10px; box-shadow:none; border:1px dashed var(--gold); background:var(--paper);">
+      <label for="rn-fecha-${p.id}">Fecha de renovación</label>
+      <input type="date" id="rn-fecha-${p.id}" value="${todayISO()}">
+      <label for="rn-plazo-${p.id}">¿Por cuánto tiempo renovaste?</label>
+      <select id="rn-plazo-${p.id}" onchange="toggleRenewCustom('${p.id}', this.value)">
+        <option value="6">6 meses</option>
+        <option value="12" selected>12 meses</option>
+        <option value="18">18 meses</option>
+        <option value="24">24 meses</option>
+        <option value="custom">Otro plazo</option>
+      </select>
+      <div id="rn-custom-wrap-${p.id}" style="display:none;">
+        <label for="rn-custom-${p.id}">Número de meses</label>
+        <input type="number" id="rn-custom-${p.id}" min="1" placeholder="Ej. 9">
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="cancelRenewal()">Cancelar</button>
+        <button class="btn primary" onclick="saveRenewal('${p.id}')">Guardar renovación</button>
+      </div>
+    </div>
   `;
 }
 
@@ -696,6 +1142,8 @@ function renderSettings(){
 
 /* ---------- ACTIONS ---------- */
 function startNewPayment(){
+  paymentTipo = 'completo';
+  costosAdicionales = [];
   if(!state.properties.length){ setView('newPayment'); return; }
   selectedPropForNewPayment = state.properties[0].id;
   setView('newPayment');
@@ -703,9 +1151,99 @@ function startNewPayment(){
 function onChangePaymentProp(id){
   selectedPropForNewPayment = id;
   const prop = propById(id);
-  document.getElementById('np-monto').value = prop.renta || '';
+  if(paymentTipo==='completo'){
+    document.getElementById('np-monto').value = montoSugeridoCompleto(prop) || '';
+  }
+  updatePaymentSummary();
+}
+function setTipoPago(tipo, btn){
+  paymentTipo = tipo;
+  const propId = document.getElementById('np-prop').value;
+  const prop = propById(propId);
+  const montoInput = document.getElementById('np-monto');
+  if(tipo==='completo'){
+    montoInput.value = montoSugeridoCompleto(prop) || '';
+    montoInput.setAttribute('readonly','readonly');
+  } else {
+    montoInput.removeAttribute('readonly');
+    montoInput.value = '';
+    montoInput.focus();
+  }
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  updatePaymentSummary();
+}
+function updatePaymentSummary(){
+  const summaryEl = document.getElementById('np-summary');
+  if(!summaryEl) return;
+  const propEl = document.getElementById('np-prop');
+  const montoEl = document.getElementById('np-monto');
+  if(!propEl || !montoEl) return;
+  const propId = propEl.value;
+  const periodoRaw = getNPPeriodo();
+  const periodo = periodoRaw.trim().toLowerCase();
+  const monto = Number(montoEl.value)||0;
+  const prop = propById(propId);
+  const rentaBase = prop ? Number(prop.renta)||0 : 0;
+  if(!prop || !periodo || !rentaBase){ summaryEl.textContent=''; summaryEl.className='pay-summary'; return; }
+
+  const pagosPeriodoPrevios = state.payments.filter(p=>p.propId===propId && p.periodo.trim().toLowerCase()===periodo);
+  const previo = pagosPeriodoPrevios.reduce((s,p)=>s+Number(p.monto),0);
+  const costosPeriodoPrevios = pagosPeriodoPrevios.reduce((s,p)=>s+costosTotal(p),0);
+  const costosNuevos = costosAdicionalesTotal();
+  const rentaEsperada = rentaBase + costosPeriodoPrevios + costosNuevos;
+
+  const credito = creditoAlEntrarPeriodo(propId, periodoRaw);
+  const disponibleAntes = previo + credito.monto;
+  const total = disponibleAntes + monto;
+
+  if(disponibleAntes<=0 && monto<=0){ summaryEl.textContent=''; summaryEl.className='pay-summary'; return; }
+
+  const creditoTxt = credito.monto>0 ? ` (incluye ${fmtMoney(credito.monto)} de crédito de ${credito.origen})` : '';
+  const costosTotalPeriodo = costosPeriodoPrevios + costosNuevos;
+  const costosTxt = costosTotalPeriodo>0 ? ` · incluye ${fmtMoney(costosTotalPeriodo)} de costos adicionales` : '';
+
+  if(total > rentaEsperada){
+    summaryEl.className = 'pay-summary complete';
+    const excedente = total - rentaEsperada;
+    summaryEl.textContent = `Con este pago quedaría un sobrepago de ${fmtMoney(excedente)}${creditoTxt}${costosTxt} · se marcará como abono a pagos futuros.`;
+  } else if(total === rentaEsperada){
+    summaryEl.className = 'pay-summary complete';
+    summaryEl.textContent = disponibleAntes>0
+      ? `Ya llevabas ${fmtMoney(disponibleAntes)}${creditoTxt} · con este pago se completa la renta de ${fmtMoney(rentaEsperada)}${costosTxt} para "${periodoRaw}".`
+      : `Cubre la renta completa de ${fmtMoney(rentaEsperada)}${costosTxt} para este periodo.`;
+  } else {
+    summaryEl.className = 'pay-summary short';
+    const falta = rentaEsperada - total;
+    summaryEl.textContent = disponibleAntes>0
+      ? `Ya llevabas ${fmtMoney(disponibleAntes)}${creditoTxt} de ${fmtMoney(rentaEsperada)}${costosTxt} · con este pago faltarían ${fmtMoney(falta)} para "${periodoRaw}".`
+      : `Pago parcial · faltarían ${fmtMoney(falta)} para completar la renta (${fmtMoney(rentaEsperada)})${costosTxt} de este periodo.`;
+  }
 }
 function editProp(id){ editingPropId = id; view='propForm'; render(); }
+
+function toggleRenewForm(id){ renewingPropId = (renewingPropId===id) ? null : id; render(); }
+function cancelRenewal(){ renewingPropId = null; render(); }
+function toggleRenewCustom(id, val){
+  const wrap = document.getElementById('rn-custom-wrap-'+id);
+  if(wrap) wrap.style.display = (val==='custom') ? 'block' : 'none';
+}
+function saveRenewal(id){
+  const fecha = document.getElementById('rn-fecha-'+id).value;
+  const plazoSel = document.getElementById('rn-plazo-'+id).value;
+  const meses = plazoSel==='custom' ? Number(document.getElementById('rn-custom-'+id).value) : Number(plazoSel);
+  if(!fecha || !meses || meses<=0){ showToast('Revisa la fecha y el plazo'); return; }
+  const p = propById(id);
+  if(!p) return;
+  p.fechaUltimaRenovacion = fecha;
+  const d = new Date(fecha+'T00:00:00');
+  d.setMonth(d.getMonth()+meses);
+  p.fechaRenovacion = d.toISOString().slice(0,10);
+  saveState();
+  renewingPropId = null;
+  showToast('Renovación registrada · nuevo vencimiento: '+fmtDate(p.fechaRenovacion));
+  render();
+}
 
 function saveProp(){
   const nombre = document.getElementById('pf-nombre').value.trim();
@@ -714,16 +1252,17 @@ function saveProp(){
   const renta = document.getElementById('pf-renta').value;
   const fechaIngreso = document.getElementById('pf-fechaingreso').value;
   const deposito = document.getElementById('pf-deposito').value;
+  const fechaUltimaRenovacion = document.getElementById('pf-fechaultima').value;
   const fechaRenovacion = document.getElementById('pf-fecharenovacion').value;
-  const aumento = document.getElementById('pf-aumento').value;
-  const porcentajeAumento = document.getElementById('pf-pct') ? document.getElementById('pf-pct').value.trim() : '';
+  const fechaAumento = document.getElementById('pf-fechaaumento').value;
   const notasRenovacion = document.getElementById('pf-notasrenovacion').value.trim();
   if(!nombre){ showToast('Escribe un nombre para el departamento'); return; }
+  const datos = {nombre, inquilino, direccion, renta, fechaIngreso, deposito, fechaUltimaRenovacion, fechaRenovacion, fechaAumento, notasRenovacion};
   if(editingPropId){
     const p = propById(editingPropId);
-    Object.assign(p, {nombre, inquilino, direccion, renta, fechaIngreso, deposito, fechaRenovacion, aumento, porcentajeAumento, notasRenovacion});
+    Object.assign(p, datos);
   } else {
-    state.properties.push({id:uid(), nombre, inquilino, direccion, renta, fechaIngreso, deposito, fechaRenovacion, aumento, porcentajeAumento, notasRenovacion});
+    state.properties.push(Object.assign({id:uid()}, datos));
   }
   saveState();
   showToast('Departamento guardado');
@@ -739,17 +1278,21 @@ function deleteProp(id){
 function savePayment(){
   const propId = document.getElementById('np-prop').value;
   const fecha = document.getElementById('np-fecha').value;
-  const periodo = document.getElementById('np-periodo').value.trim();
+  const periodo = getNPPeriodo();
   const monto = document.getElementById('np-monto').value;
   const metodo = document.getElementById('np-metodo').value;
   const notas = document.getElementById('np-notas').value.trim();
   if(!fecha || !monto || Number(monto)<=0){ showToast('Revisa la fecha y el monto'); return; }
+  const costos = costosAdicionales
+    .filter(c=>c.concepto && Number(c.monto)>0)
+    .map(c=>({concepto:c.concepto.trim(), monto:Number(c.monto)}));
   const folio = state.nextFolio;
-  const payment = {id:uid(), propId, fecha, periodo, monto, metodo, notas, folio};
+  const payment = {id:uid(), propId, fecha, periodo, monto, metodo, notas, folio, tipoPago: paymentTipo, costos};
   state.payments.push(payment);
   state.nextFolio = folio + 1;
   saveState();
   activeReceiptId = payment.id;
+  costosAdicionales = [];
   view = 'receipt';
   render();
   window.scrollTo(0,0);
@@ -761,7 +1304,17 @@ async function shareReceipt(id){
   const p = state.payments.find(x=>x.id===id);
   const prop = propById(p.propId);
   const folioStr = String(p.folio).padStart(4,'0');
-  const text = `Recibo de renta No. ${folioStr}\nFecha: ${fmtDate(p.fecha)}\nDepartamento: ${prop?prop.nombre:''}\nInquilino: ${prop?prop.inquilino:''}\nPeriodo: ${p.periodo}\nMonto: ${fmtMoney(p.monto)}\nMétodo: ${p.metodo}`;
+  const ledger = buildPeriodLedger(p.propId);
+  const entry = ledger[p.periodo.trim()];
+  const estadoTxt = entry
+    ? (entry.estado==='parcial' ? 'Pago parcial' : entry.estado==='sobrepago' ? 'Sobrepago' : 'Pagado')
+    : 'Pagado';
+  const creditoTxt = entry && entry.creditoInicial>0 ? `\nCrédito aplicado de ${entry.creditoInicialOrigen}: ${fmtMoney(entry.creditoInicial)}` : '';
+  const costosTxt = (p.costos && p.costos.length)
+    ? '\n' + p.costos.map(c=>`${c.concepto}: ${fmtMoney(c.monto)}`).join('\n')
+    : '';
+  const pendienteTxt = entry && entry.estado==='parcial' ? `\nPendiente: ${fmtMoney(entry.faltante)}` : '';
+  const text = `Recibo de renta No. ${folioStr}\nFecha: ${fmtDate(p.fecha)}\nDepartamento: ${prop?prop.nombre:''}\nInquilino: ${prop?prop.inquilino:''}\nPeriodo: ${p.periodo}\nMonto: ${fmtMoney(p.monto)}\nMétodo: ${p.metodo}${costosTxt}\nEstado: ${estadoTxt}${creditoTxt}${pendienteTxt}`;
   if(navigator.share){
     try{ await navigator.share({title:'Recibo de renta', text}); }catch(e){}
   } else {
